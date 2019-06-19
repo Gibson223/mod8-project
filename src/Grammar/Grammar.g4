@@ -14,12 +14,25 @@ line
 		OCUR line+ CCUR							#forLine
     | types VARNAME (ASGN expr)? SCOL			#declLine
     | target ASGN list                          #asgnLine
-    | ARRAY types target ASGN list SCOL			#asgnArrLine
+//    | ARRAY+ types target ASGN list SCOL	    #asgnArrLine
+    | ARRAY+ types target ASGN OSQR list CSQR SCOL#asgnArrLine
 	;
 
 list
-    :OSQR (expr (COM expr)*)? CSQR
+    : (sqrlist (COM sqrlist)*)?                #commaList
+    | sqrlist                                   #nestedList
     ;
+
+sqrlist
+    : OSQR sqrlist CSQR                            #nested
+    | OSQR expr CSQR                               #exprList
+    ;
+
+//list
+//    : OSQR list CSQR                            #nestedList
+//    | OSQR (list (COM list)*)? CSQR             #unnestedList
+//    | expr                                      #exprList
+//    ;
 
 expr
 	: expr comp expr 							#compExpr
@@ -50,6 +63,7 @@ types
 	| BOOL 
 	| STR
 	| CHAR
+	| ARRAY types
     ;
 
 
