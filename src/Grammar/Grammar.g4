@@ -2,24 +2,27 @@ grammar Grammar;
 
 program: (function |line)+ EOF;
 
-function: FUN (types)? VARNAME+ OCUR line+ CCUR;
+function: FUN (types)? FUNNAME VARNAME* OCUR line+ (RETURN expr)? CCUR;
 
+
+functioncall: FUNNAME expr* SCOL;
 
 line
-	: IF expr OCUR line+ CCUR
-		(ELIF expr OCUR line+ CCUR)*
-		(ELSE expr OCUR line+ CCUR)?			#ifLine
-	| FOR types? VARNAME 
+	: IF expr OCUR line* CCUR
+		(ELIF expr OCUR line* CCUR)*
+		(ELSE OCUR line* CCUR)?			#ifLine
+	| FOR INT? VARNAME
 		(ASGN expr)? SCOL
 		expr SCOL 
 		VARNAME ASGN expr SCOL
-		OCUR line+ CCUR							#forLine
-	| PARALLEL OCUR line+ CCUR                  #parallelLine
-    | SEQUENTIAL OCUR line+ CCUR                #sequentialLine
-    | types VARNAME (ASGN expr)? SCOL	        #declLine
-    | target ASGN expr SCOL                     #asgnLine
+		OCUR line* CCUR							#forLine
+	| PARALLEL OCUR line* CCUR                  #parallelLine
+    | SEQUENTIAL OCUR line* CCUR                #sequentialLine
+    | types VARNAME (( ASGN expr) |functioncall)? SCOL	        #declLine
+    | target ASGN (expr|functioncall) SCOL      #asgnLine
     | (LOCK | UNLOCK) VARNAME SCOL              #lockLine
-    | RETURN expr SCOL                          #returnLine
+    | functioncall                              #funcallLine
+//    | RETURN expr SCOL                          #returnLine
     ;
 
 expr
@@ -109,6 +112,7 @@ fragment LETTER: UPPERCASE | LOWERCASE;
 fragment DIGIT: [0-9];
 fragment COMP: EQ | NEQ | LT | LET | GT | GET;
 
+FUNNAME: UPPERCASE (LETTER | DIGIT)*;
 VARNAME: LOWERCASE (LETTER | DIGIT)*;
 NUM: DIGIT+;
 STRING: '"' (~["\\] | '\\'.)* '"';
