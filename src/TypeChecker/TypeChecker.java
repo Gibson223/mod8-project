@@ -48,19 +48,73 @@ public class TypeChecker extends GrammarBaseListener {
 		Lexer lexer = new GrammarLexer(charStream);
 		TokenStream tokenStream = new CommonTokenStream(lexer);
 		GrammarParser grammarParser = new GrammarParser(tokenStream);
-//      TODO: Decide the right thing to use (program() or line() or ...)
+		//TODO: Decide the right thing to use (program() or line() or ...)
 		ParseTree tree = grammarParser.program();
-		TypeChecker typeChecker = new TypeChecker();
-		typeChecker.parseTreeProperty = new ParseTreeProperty<>();
-		typeChecker.parseTree = tree;
-		new ParseTreeWalker().walk(typeChecker, tree);
-		ArrayList typeArray = typeChecker.parseTreeProperty.get(typeChecker.parseTree);
-		if (typeChecker.error != null) {
-			String errorSpot = expression.substring(typeChecker.errorOffset, typeChecker.errorEnd+1);
-			throw new ParseException(typeChecker.error + errorSpot + "; Index in input: " + typeChecker.errorEnd + "; ", typeChecker.errorEnd);
+
+		this.parseTreeProperty = new ParseTreeProperty<>();
+		this.parseTree = tree;
+		new ParseTreeWalker().walk(this, tree);
+		ArrayList typeArray = this.parseTreeProperty.get(this.parseTree);
+		if (this.error != null) {
+			String errorSpot = expression.substring(this.errorOffset, this.errorEnd+1);
+			throw new ParseException(this.error + errorSpot + "; Index in input: " + this.errorEnd + "; ", this.errorEnd);
 		}
-//		TODO: Check typeArray and decide type to return based on that
+
+		//TODO: Check typeArray and decide type to return based on that
 		return typeString;
+	}
+
+//	============================================================
+//	----------------------- Comp below -------------------------
+//	============================================================
+
+	//TODO: implement way for variables to be checked on type of that var when that symbolTable works
+	@Override
+	public void exitComp(GrammarParser.CompContext ctx) {
+		//check if the left and right hand side of the comparison have the same type
+		ArrayList left = this.parseTreeProperty.get(ctx.getChild(0));
+		ArrayList right = this.parseTreeProperty.get(ctx.getChild(2));
+		if (left.size() != right.size())  {
+			this.error = "Different types cannot be compared; At: " ;
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		} else {
+			for (int i = 0; i < left.size(); i++) {
+				if (left.get(i) != right.get(i)) {
+					this.error = "Different types cannot be compared; At: " ;
+					this.errorOffset = ctx.getStart().getStartIndex();
+					this.errorEnd = ctx.getStop().getStopIndex();
+				}
+			}
+		}
+
+		//new type becomes boolean (== [1])
+		ArrayList<Integer> type = new ArrayList<>();
+		type.add(1);
+
+		this.parseTreeProperty.put(ctx, type);
+		if (ctx.exception != null) {
+			this.error = "Different types cannot be compared; At: " ;
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		}
+
+	}
+
+//	============================================================
+//	----------------------- Target below -----------------------
+//	============================================================
+
+	//  TODO: implement with the variable symbol table when it is there
+	@Override
+	public void exitVarTarget(GrammarParser.VarTargetContext ctx) {
+
+	}
+
+	//  TODO: implement with the variable symbol table when it is there
+	@Override
+	public void exitArrayTarget(GrammarParser.ArrayTargetContext ctx) {
+
 	}
 
 //	============================================================
