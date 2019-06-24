@@ -28,6 +28,18 @@ public class GrammarBaseListener implements GrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterFunction(GrammarParser.FunctionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitFunction(GrammarParser.FunctionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterIfLine(GrammarParser.IfLineContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -47,6 +59,30 @@ public class GrammarBaseListener implements GrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitForLine(GrammarParser.ForLineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterParallelLine(GrammarParser.ParallelLineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParallelLine(GrammarParser.ParallelLineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSequentialLine(GrammarParser.SequentialLineContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSequentialLine(GrammarParser.SequentialLineContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -76,61 +112,37 @@ public class GrammarBaseListener implements GrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterAsgnArrLine(GrammarParser.AsgnArrLineContext ctx) { }
+	@Override public void enterLockLine(GrammarParser.LockLineContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitAsgnArrLine(GrammarParser.AsgnArrLineContext ctx) { }
+	@Override public void exitLockLine(GrammarParser.LockLineContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCommaList(GrammarParser.CommaListContext ctx) { }
+	@Override public void enterReturnLine(GrammarParser.ReturnLineContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCommaList(GrammarParser.CommaListContext ctx) { }
+	@Override public void exitReturnLine(GrammarParser.ReturnLineContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterNestedList(GrammarParser.NestedListContext ctx) { }
+	@Override public void enterAddorsubExpr(GrammarParser.AddorsubExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitNestedList(GrammarParser.NestedListContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterNested(GrammarParser.NestedContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitNested(GrammarParser.NestedContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterExprList(GrammarParser.ExprListContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitExprList(GrammarParser.ExprListContext ctx) { }
+	@Override public void exitAddorsubExpr(GrammarParser.AddorsubExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -143,18 +155,6 @@ public class GrammarBaseListener implements GrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitVarExpr(GrammarParser.VarExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterAddExpr(GrammarParser.AddExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitAddExpr(GrammarParser.AddExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -184,13 +184,25 @@ public class GrammarBaseListener implements GrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSubExpr(GrammarParser.SubExprContext ctx) { }
+	@Override public void enterParensExpr(GrammarParser.ParensExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSubExpr(GrammarParser.SubExprContext ctx) { }
+	@Override public void exitParensExpr(GrammarParser.ParensExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterListExpr(GrammarParser.ListExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitListExpr(GrammarParser.ListExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
