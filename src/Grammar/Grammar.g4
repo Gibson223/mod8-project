@@ -59,11 +59,11 @@ target
     ;
 
 types
-	: INT 
-	| BOOL 
-	| STR
-	| CHAR
-	| ARRAY types
+	: INT                                       #int
+	| BOOL                                      #bool
+	| STR                                       #str
+	| CHAR                                      #char
+	| ARRAY types                               #array
     ;
 
 

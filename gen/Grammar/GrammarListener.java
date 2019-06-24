@@ -1,4 +1,5 @@
-// Generated from C:/Users/Gibson/Nextcloud/Technical Computer Science/year2/module8/mod8-project/src/Grammar\Grammar.g4 by ANTLR 4.7.2
+// Generated from C:/Users/Bjorn/Documents/Universiteit/Year 2/MOD08/mod8-project/src/Grammar\Grammar.g4 by ANTLR 4.7.2
+package Grammar;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 /**
@@ -77,15 +78,53 @@ public interface GrammarListener extends ParseTreeListener {
 	 */
 	void exitAsgnArrLine(GrammarParser.AsgnArrLineContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link GrammarParser#list}.
+	 * Enter a parse tree produced by the {@code commaList}
+	 * labeled alternative in {@link GrammarParser#list}.
 	 * @param ctx the parse tree
 	 */
-	void enterList(GrammarParser.ListContext ctx);
+	void enterCommaList(GrammarParser.CommaListContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link GrammarParser#list}.
+	 * Exit a parse tree produced by the {@code commaList}
+	 * labeled alternative in {@link GrammarParser#list}.
 	 * @param ctx the parse tree
 	 */
-	void exitList(GrammarParser.ListContext ctx);
+	void exitCommaList(GrammarParser.CommaListContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code nestedList}
+	 * labeled alternative in {@link GrammarParser#list}.
+	 * @param ctx the parse tree
+	 */
+	void enterNestedList(GrammarParser.NestedListContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code nestedList}
+	 * labeled alternative in {@link GrammarParser#list}.
+	 * @param ctx the parse tree
+	 */
+	void exitNestedList(GrammarParser.NestedListContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code nested}
+	 * labeled alternative in {@link GrammarParser#sqrlist}.
+	 * @param ctx the parse tree
+	 */
+	void enterNested(GrammarParser.NestedContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code nested}
+	 * labeled alternative in {@link GrammarParser#sqrlist}.
+	 * @param ctx the parse tree
+	 */
+	void exitNested(GrammarParser.NestedContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code exprList}
+	 * labeled alternative in {@link GrammarParser#sqrlist}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprList(GrammarParser.ExprListContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code exprList}
+	 * labeled alternative in {@link GrammarParser#sqrlist}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprList(GrammarParser.ExprListContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code varExpr}
 	 * labeled alternative in {@link GrammarParser#expr}.

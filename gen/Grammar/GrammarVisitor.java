@@ -1,4 +1,5 @@
-// Generated from C:/Users/Gibson/Nextcloud/Technical Computer Science/year2/module8/mod8-project/src/Grammar\Grammar.g4 by ANTLR 4.7.2
+// Generated from C:/Users/Bjorn/Documents/Universiteit/Year 2/MOD08/mod8-project/src/Grammar\Grammar.g4 by ANTLR 4.7.2
+package Grammar;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
@@ -51,11 +52,33 @@ public interface GrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAsgnArrLine(GrammarParser.AsgnArrLineContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link GrammarParser#list}.
+	 * Visit a parse tree produced by the {@code commaList}
+	 * labeled alternative in {@link GrammarParser#list}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitList(GrammarParser.ListContext ctx);
+	T visitCommaList(GrammarParser.CommaListContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code nestedList}
+	 * labeled alternative in {@link GrammarParser#list}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNestedList(GrammarParser.NestedListContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code nested}
+	 * labeled alternative in {@link GrammarParser#sqrlist}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNested(GrammarParser.NestedContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code exprList}
+	 * labeled alternative in {@link GrammarParser#sqrlist}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprList(GrammarParser.ExprListContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code varExpr}
 	 * labeled alternative in {@link GrammarParser#expr}.
