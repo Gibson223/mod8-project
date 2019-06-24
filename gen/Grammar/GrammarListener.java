@@ -244,13 +244,63 @@ public interface GrammarListener extends ParseTreeListener {
 	 */
 	void exitArrayTarget(GrammarParser.ArrayTargetContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link GrammarParser#types}.
+	 * Enter a parse tree produced by the {@code int}
+	 * labeled alternative in {@link GrammarParser#types}.
 	 * @param ctx the parse tree
 	 */
-	void enterTypes(GrammarParser.TypesContext ctx);
+	void enterInt(GrammarParser.IntContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link GrammarParser#types}.
+	 * Exit a parse tree produced by the {@code int}
+	 * labeled alternative in {@link GrammarParser#types}.
 	 * @param ctx the parse tree
 	 */
-	void exitTypes(GrammarParser.TypesContext ctx);
+	void exitInt(GrammarParser.IntContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code bool}
+	 * labeled alternative in {@link GrammarParser#types}.
+	 * @param ctx the parse tree
+	 */
+	void enterBool(GrammarParser.BoolContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code bool}
+	 * labeled alternative in {@link GrammarParser#types}.
+	 * @param ctx the parse tree
+	 */
+	void exitBool(GrammarParser.BoolContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code char}
+	 * labeled alternative in {@link GrammarParser#types}.
+	 * @param ctx the parse tree
+	 */
+	void enterChar(GrammarParser.CharContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code char}
+	 * labeled alternative in {@link GrammarParser#types}.
+	 * @param ctx the parse tree
+	 */
+	void exitChar(GrammarParser.CharContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code str}
+	 * labeled alternative in {@link GrammarParser#types}.
+	 * @param ctx the parse tree
+	 */
+	void enterStr(GrammarParser.StrContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code str}
+	 * labeled alternative in {@link GrammarParser#types}.
+	 * @param ctx the parse tree
+	 */
+	void exitStr(GrammarParser.StrContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code array}
+	 * labeled alternative in {@link GrammarParser#types}.
+	 * @param ctx the parse tree
+	 */
+	void enterArray(GrammarParser.ArrayContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code array}
+	 * labeled alternative in {@link GrammarParser#types}.
+	 * @param ctx the parse tree
+	 */
+	void exitArray(GrammarParser.ArrayContext ctx);
 }

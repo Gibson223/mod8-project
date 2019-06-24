@@ -61,8 +61,8 @@ target
 types
 	: INT                                       #int
 	| BOOL                                      #bool
-	| STR                                       #str
 	| CHAR                                      #char
+	| STR                                       #str
 	| ARRAY types                               #array
     ;
 
