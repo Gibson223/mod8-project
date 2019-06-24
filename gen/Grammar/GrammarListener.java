@@ -18,6 +18,16 @@ public interface GrammarListener extends ParseTreeListener {
 	 */
 	void exitProgram(GrammarParser.ProgramContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link GrammarParser#function}.
+	 * @param ctx the parse tree
+	 */
+	void enterFunction(GrammarParser.FunctionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link GrammarParser#function}.
+	 * @param ctx the parse tree
+	 */
+	void exitFunction(GrammarParser.FunctionContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code ifLine}
 	 * labeled alternative in {@link GrammarParser#line}.
 	 * @param ctx the parse tree
@@ -41,6 +51,30 @@ public interface GrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitForLine(GrammarParser.ForLineContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code parallelLine}
+	 * labeled alternative in {@link GrammarParser#line}.
+	 * @param ctx the parse tree
+	 */
+	void enterParallelLine(GrammarParser.ParallelLineContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code parallelLine}
+	 * labeled alternative in {@link GrammarParser#line}.
+	 * @param ctx the parse tree
+	 */
+	void exitParallelLine(GrammarParser.ParallelLineContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code sequentialLine}
+	 * labeled alternative in {@link GrammarParser#line}.
+	 * @param ctx the parse tree
+	 */
+	void enterSequentialLine(GrammarParser.SequentialLineContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code sequentialLine}
+	 * labeled alternative in {@link GrammarParser#line}.
+	 * @param ctx the parse tree
+	 */
+	void exitSequentialLine(GrammarParser.SequentialLineContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code declLine}
 	 * labeled alternative in {@link GrammarParser#line}.
@@ -66,65 +100,41 @@ public interface GrammarListener extends ParseTreeListener {
 	 */
 	void exitAsgnLine(GrammarParser.AsgnLineContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code asgnArrLine}
+	 * Enter a parse tree produced by the {@code lockLine}
 	 * labeled alternative in {@link GrammarParser#line}.
 	 * @param ctx the parse tree
 	 */
-	void enterAsgnArrLine(GrammarParser.AsgnArrLineContext ctx);
+	void enterLockLine(GrammarParser.LockLineContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code asgnArrLine}
+	 * Exit a parse tree produced by the {@code lockLine}
 	 * labeled alternative in {@link GrammarParser#line}.
 	 * @param ctx the parse tree
 	 */
-	void exitAsgnArrLine(GrammarParser.AsgnArrLineContext ctx);
+	void exitLockLine(GrammarParser.LockLineContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code commaList}
-	 * labeled alternative in {@link GrammarParser#list}.
+	 * Enter a parse tree produced by the {@code returnLine}
+	 * labeled alternative in {@link GrammarParser#line}.
 	 * @param ctx the parse tree
 	 */
-	void enterCommaList(GrammarParser.CommaListContext ctx);
+	void enterReturnLine(GrammarParser.ReturnLineContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code commaList}
-	 * labeled alternative in {@link GrammarParser#list}.
+	 * Exit a parse tree produced by the {@code returnLine}
+	 * labeled alternative in {@link GrammarParser#line}.
 	 * @param ctx the parse tree
 	 */
-	void exitCommaList(GrammarParser.CommaListContext ctx);
+	void exitReturnLine(GrammarParser.ReturnLineContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code nestedList}
-	 * labeled alternative in {@link GrammarParser#list}.
+	 * Enter a parse tree produced by the {@code addorsubExpr}
+	 * labeled alternative in {@link GrammarParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void enterNestedList(GrammarParser.NestedListContext ctx);
+	void enterAddorsubExpr(GrammarParser.AddorsubExprContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code nestedList}
-	 * labeled alternative in {@link GrammarParser#list}.
+	 * Exit a parse tree produced by the {@code addorsubExpr}
+	 * labeled alternative in {@link GrammarParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void exitNestedList(GrammarParser.NestedListContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code nested}
-	 * labeled alternative in {@link GrammarParser#sqrlist}.
-	 * @param ctx the parse tree
-	 */
-	void enterNested(GrammarParser.NestedContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code nested}
-	 * labeled alternative in {@link GrammarParser#sqrlist}.
-	 * @param ctx the parse tree
-	 */
-	void exitNested(GrammarParser.NestedContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code exprList}
-	 * labeled alternative in {@link GrammarParser#sqrlist}.
-	 * @param ctx the parse tree
-	 */
-	void enterExprList(GrammarParser.ExprListContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code exprList}
-	 * labeled alternative in {@link GrammarParser#sqrlist}.
-	 * @param ctx the parse tree
-	 */
-	void exitExprList(GrammarParser.ExprListContext ctx);
+	void exitAddorsubExpr(GrammarParser.AddorsubExprContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code varExpr}
 	 * labeled alternative in {@link GrammarParser#expr}.
@@ -137,18 +147,6 @@ public interface GrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitVarExpr(GrammarParser.VarExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code addExpr}
-	 * labeled alternative in {@link GrammarParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterAddExpr(GrammarParser.AddExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code addExpr}
-	 * labeled alternative in {@link GrammarParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitAddExpr(GrammarParser.AddExprContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code compExpr}
 	 * labeled alternative in {@link GrammarParser#expr}.
@@ -174,17 +172,29 @@ public interface GrammarListener extends ParseTreeListener {
 	 */
 	void exitArrExpr(GrammarParser.ArrExprContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code subExpr}
+	 * Enter a parse tree produced by the {@code parensExpr}
 	 * labeled alternative in {@link GrammarParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void enterSubExpr(GrammarParser.SubExprContext ctx);
+	void enterParensExpr(GrammarParser.ParensExprContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code subExpr}
+	 * Exit a parse tree produced by the {@code parensExpr}
 	 * labeled alternative in {@link GrammarParser#expr}.
 	 * @param ctx the parse tree
 	 */
-	void exitSubExpr(GrammarParser.SubExprContext ctx);
+	void exitParensExpr(GrammarParser.ParensExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code listExpr}
+	 * labeled alternative in {@link GrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterListExpr(GrammarParser.ListExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code listExpr}
+	 * labeled alternative in {@link GrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitListExpr(GrammarParser.ListExprContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code multExpr}
 	 * labeled alternative in {@link GrammarParser#expr}.

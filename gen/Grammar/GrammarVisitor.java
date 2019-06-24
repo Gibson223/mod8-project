@@ -17,6 +17,12 @@ public interface GrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitProgram(GrammarParser.ProgramContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link GrammarParser#function}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunction(GrammarParser.FunctionContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code ifLine}
 	 * labeled alternative in {@link GrammarParser#line}.
 	 * @param ctx the parse tree
@@ -30,6 +36,20 @@ public interface GrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitForLine(GrammarParser.ForLineContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code parallelLine}
+	 * labeled alternative in {@link GrammarParser#line}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParallelLine(GrammarParser.ParallelLineContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code sequentialLine}
+	 * labeled alternative in {@link GrammarParser#line}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSequentialLine(GrammarParser.SequentialLineContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code declLine}
 	 * labeled alternative in {@link GrammarParser#line}.
@@ -45,40 +65,26 @@ public interface GrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAsgnLine(GrammarParser.AsgnLineContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code asgnArrLine}
+	 * Visit a parse tree produced by the {@code lockLine}
 	 * labeled alternative in {@link GrammarParser#line}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitAsgnArrLine(GrammarParser.AsgnArrLineContext ctx);
+	T visitLockLine(GrammarParser.LockLineContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code commaList}
-	 * labeled alternative in {@link GrammarParser#list}.
+	 * Visit a parse tree produced by the {@code returnLine}
+	 * labeled alternative in {@link GrammarParser#line}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitCommaList(GrammarParser.CommaListContext ctx);
+	T visitReturnLine(GrammarParser.ReturnLineContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code nestedList}
-	 * labeled alternative in {@link GrammarParser#list}.
+	 * Visit a parse tree produced by the {@code addorsubExpr}
+	 * labeled alternative in {@link GrammarParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitNestedList(GrammarParser.NestedListContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code nested}
-	 * labeled alternative in {@link GrammarParser#sqrlist}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNested(GrammarParser.NestedContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code exprList}
-	 * labeled alternative in {@link GrammarParser#sqrlist}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitExprList(GrammarParser.ExprListContext ctx);
+	T visitAddorsubExpr(GrammarParser.AddorsubExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code varExpr}
 	 * labeled alternative in {@link GrammarParser#expr}.
@@ -86,13 +92,6 @@ public interface GrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitVarExpr(GrammarParser.VarExprContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code addExpr}
-	 * labeled alternative in {@link GrammarParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAddExpr(GrammarParser.AddExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code compExpr}
 	 * labeled alternative in {@link GrammarParser#expr}.
@@ -108,12 +107,19 @@ public interface GrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitArrExpr(GrammarParser.ArrExprContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code subExpr}
+	 * Visit a parse tree produced by the {@code parensExpr}
 	 * labeled alternative in {@link GrammarParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSubExpr(GrammarParser.SubExprContext ctx);
+	T visitParensExpr(GrammarParser.ParensExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code listExpr}
+	 * labeled alternative in {@link GrammarParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitListExpr(GrammarParser.ListExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code multExpr}
 	 * labeled alternative in {@link GrammarParser#expr}.
