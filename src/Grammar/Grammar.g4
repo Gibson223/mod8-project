@@ -1,6 +1,8 @@
 grammar Grammar;
 
-program: line+ EOF;
+program: (function |line)+ EOF;
+
+function: FUN (types)? VARNAME+ OCUR line+ CCUR;
 
 
 line
@@ -12,36 +14,24 @@ line
 		expr SCOL 
 		VARNAME ASGN expr SCOL
 		OCUR line+ CCUR							#forLine
-    | types VARNAME (ASGN expr)? SCOL			#declLine
-    | target ASGN list                          #asgnLine
-//    | ARRAY+ types target ASGN list SCOL	    #asgnArrLine
-    | ARRAY+ types target ASGN OSQR list CSQR SCOL#asgnArrLine
-	;
-
-list
-    : (sqrlist (COM sqrlist)*)?                #commaList
-    | sqrlist                                   #nestedList
+	| PARALLEL OCUR line+ CCUR                  #parallelLine
+    | SEQUENTIAL OCUR line+ CCUR                #sequentialLine
+    | types VARNAME (ASGN expr)? SCOL	        #declLine
+    | target ASGN expr SCOL                     #asgnLine
+    | (LOCK | UNLOCK) VARNAME SCOL              #lockLine
+    | RETURN expr SCOL                          #returnLine
     ;
-
-sqrlist
-    : OSQR sqrlist CSQR                            #nested
-    | OSQR expr CSQR                               #exprList
-    ;
-
-//list
-//    : OSQR list CSQR                            #nestedList
-//    | OSQR (list (COM list)*)? CSQR             #unnestedList
-//    | expr                                      #exprList
-//    ;
 
 expr
-	: expr comp expr 							#compExpr
-	| expr PLUS expr							#addExpr
-	| expr MIN expr 							#subExpr
+    : OPAR expr CPAR                            #parensExpr
+    // | (NOT | MIN) expr                       #notExpr
+	| expr comp expr 							#compExpr
 	| expr TIMES expr 							#multExpr
+	| expr (PLUS|MIN) expr						#addorsubExpr
 	| (NUM | TRUE | FALSE)						#constExpr
 	| VARNAME OSQR expr CSQR					#arrExpr
 	| VARNAME									#varExpr
+	| OSQR (expr (COM expr)*)? CSQR             #listExpr
 	;
 
 comp
@@ -67,6 +57,14 @@ types
     ;
 
 
+
+FUN: 'Fun';
+RETURN: 'return';
+LOCK: 'lock';
+UNLOCK: 'unlock';
+PARALLEL: 'parallel';
+SEQUENTIAL: 'sequential';
+
 OCUR:	'{';
 CCUR:	'}';
 OPAR: 	'(';
@@ -77,6 +75,8 @@ COL:	':';
 SCOL:	';';
 COM:	',';
 ASGN:	'=';
+
+NOT:'!';
 
 EQ:'==';
 NEQ:'!=';
