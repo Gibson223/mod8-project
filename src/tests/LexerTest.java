@@ -130,7 +130,9 @@ public class LexerTest {
         // arrays
         correctline("Bool a = [1,2,3];"); // assigning arr to not arr type is allowed TODO right??
         wrongline("Bool a = 5");
-        correctline("Arr Int a = [];Arr Int a = c;");
+        wrongline("Arr Int a = []");
+        correctline("Arr Int a = [1];Arr Int a = c;");
+
         correctline("Arr Int a = [1,2,3,4];");
         wrongline("Arr Int a = 1 2 3 ;");
 
