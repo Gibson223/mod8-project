@@ -2,7 +2,7 @@ grammar Grammar;
 
 program: (function | line)+ EOF;
 
-function: FUN (types)? FUNNAME VARNAME* OCUR line+ (RETURN expr)? CCUR;
+function: FUN (types)? FUNNAME (types VARNAME)* OCUR line+ (RETURN expr)? CCUR;
 
 
 functioncall: FUNNAME expr*;

@@ -10,26 +10,30 @@ public class LexerTest {
     @Test
     public void functionTest() {
         // without returns
-        correctfun("Fun Name arg1 arg2 {Int x = 19;a[5] = 10;}");
-        correctfun("Fun Name arg1 arg2 {\n" +
+        // no type for input
+        wrongfun("Fun Name arg1 arg2 {Int x = 19;a[5] = 10;}");
+        correctfun("Fun Name Int arg1 Bool arg2 {Int x = 19;a[5] = 10;}");
+        correctfun("Fun Name Int arg1 Bool arg2 {\n" +
                     "   x = 1;" +
                     "   parallel {" +
                     "       sequential {lock x;x = 4;unlock x;y = 2;z = 3;}\n" +
                     "   }"+
                     "}");
-        correctfun("Fun Name arg1 arg2 {\n" +
+        correctfun("Fun Name Str arg1 Arr Int arg2 {\n" +
                         "in = 4;\n" +
                         "}");
         // with returns
-        correctfun("Fun Int Name arg1 arg2 {Int x = 19;a[5] = 10;}");
-        correctfun("Fun Bool Name arg1 arg2 {\n" +
+        // without type for input
+        wrongfun("Fun Int Name arg1 arg2 {Int x = 19;a[5] = 10;}");
+        correctfun("Fun Int Name Int arg1 Bool arg2 {Int x = 19;a[5] = 10;}");
+        correctfun("Fun Bool Name {\n" +
                     "   x = 1;" +
                     "   parallel {" +
                     "       sequential {lock x;x = 4;unlock x;y = 2;z = 3;}\n" +
                     "   }" +
                     "   return x"+
                     "}");
-        correctfun("Fun Arr Int Name arg1 arg2 {\n" +
+        correctfun("Fun Arr Int Name Str arg1 Str arg2 {\n" +
                         "in = 4;\n" +
                         "return in\n" +
                         "}");
@@ -37,7 +41,7 @@ public class LexerTest {
 
     @Test
     public void returnTest() {
-        String validproglines = "Fun Name arg1 arg2 arg3 { Int a = 4; Bool c = 'c'; parallel {}";
+        String validproglines = "Fun Name Int arg1 Str arg2 Bool arg3 { Int a = 4; Bool c = 'c'; parallel {}";
         correctfun(validproglines +"return x}");
         wrongfun(validproglines +"Return x}");
         wrongfun(validproglines +"return x,y,z;}");
