@@ -104,7 +104,7 @@ public class LexerTest {
         // parallel with lines
         correctline("sequential { Int a = 5; Bool s;}");
     }
-    
+
     @Test //#decLine & asgnLine
     public void TypeAndAssign() {
         correctline("Int a = 10;Int b; Int c = a;");
@@ -211,18 +211,19 @@ public class LexerTest {
         parser.function();
         assertTrue(check(parser));
     }
+
     public static void wrongfun(String s){
         GrammarParser parser = newParser(s);
         parser.function();
         assertFalse(check(parser));
     }
 
-
     public static void correctline(String s) {
         GrammarParser parser = newParser(s);
         parser.line();
         assertTrue(check(parser));
     }
+
     public static void wrongline(String s){
         GrammarParser parser = newParser(s);
         parser.line();
@@ -234,6 +235,7 @@ public class LexerTest {
         parser.expr();
         assertTrue(check(parser));
     }
+
     public static void wrongexpr(String s){
         GrammarParser parser = newParser(s);
         parser.expr();
@@ -248,8 +250,9 @@ public class LexerTest {
         parser.removeErrorListeners();
         return parser;
     }
+
     private static boolean check(Parser parser) {
-        System.out.println(parser.getNumberOfSyntaxErrors());
+//        System.out.println(parser.getNumberOfSyntaxErrors());
         return parser.getNumberOfSyntaxErrors() == 0;
     }
 
