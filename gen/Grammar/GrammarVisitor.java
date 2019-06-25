@@ -92,19 +92,19 @@ public interface GrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFuncallLine(GrammarParser.FuncallLineContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code addorsubExpr}
+	 * labeled alternative in {@link GrammarParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAddorsubExpr(GrammarParser.AddorsubExprContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code varExpr}
 	 * labeled alternative in {@link GrammarParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitVarExpr(GrammarParser.VarExprContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code addExpr}
-	 * labeled alternative in {@link GrammarParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAddExpr(GrammarParser.AddExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code compExpr}
 	 * labeled alternative in {@link GrammarParser#expr}.
@@ -126,13 +126,6 @@ public interface GrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitParensExpr(GrammarParser.ParensExprContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code subExpr}
-	 * labeled alternative in {@link GrammarParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSubExpr(GrammarParser.SubExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code listExpr}
 	 * labeled alternative in {@link GrammarParser#expr}.

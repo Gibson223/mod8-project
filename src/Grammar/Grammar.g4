@@ -19,10 +19,11 @@ line
 	| WHILE expr OCUR line* CCUR						#whileLine
 	| PARALLEL OCUR line* CCUR                  		#parallelLine
     | SEQUENTIAL OCUR line* CCUR                		#sequentialLine
-    | types VARNAME ( ASGN expr | ASGN functioncall)? SCOL	#declLine
+    | types VARNAME 
+        (ASGN expr | ASGN functioncall)? SCOL	        #declLine
     | target ASGN (expr | functioncall) SCOL      		#asgnLine
     | (LOCK | UNLOCK) VARNAME SCOL              		#lockLine
-    | functioncall SCOL                             		#funcallLine
+    | functioncall SCOL                             	#funcallLine
     ;
 
 expr
@@ -34,7 +35,7 @@ expr
 	| (NUM | TRUE | FALSE | STRING)						#constExpr
 	| VARNAME OSQR expr CSQR							#arrExpr
 	| VARNAME											#varExpr
-	| OSQR (expr (COM expr)*)? CSQR             		#listExpr
+	| OSQR expr (COM expr)* CSQR             		    #listExpr
 	; 
 
 comp
