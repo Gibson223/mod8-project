@@ -146,6 +146,18 @@ public interface GrammarListener extends ParseTreeListener {
 	 */
 	void exitFuncallLine(GrammarParser.FuncallLineContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code addorsubExpr}
+	 * labeled alternative in {@link GrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterAddorsubExpr(GrammarParser.AddorsubExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code addorsubExpr}
+	 * labeled alternative in {@link GrammarParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitAddorsubExpr(GrammarParser.AddorsubExprContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code varExpr}
 	 * labeled alternative in {@link GrammarParser#expr}.
 	 * @param ctx the parse tree
@@ -157,18 +169,6 @@ public interface GrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitVarExpr(GrammarParser.VarExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code addExpr}
-	 * labeled alternative in {@link GrammarParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterAddExpr(GrammarParser.AddExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code addExpr}
-	 * labeled alternative in {@link GrammarParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitAddExpr(GrammarParser.AddExprContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code compExpr}
 	 * labeled alternative in {@link GrammarParser#expr}.
@@ -205,18 +205,6 @@ public interface GrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitParensExpr(GrammarParser.ParensExprContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code subExpr}
-	 * labeled alternative in {@link GrammarParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterSubExpr(GrammarParser.SubExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code subExpr}
-	 * labeled alternative in {@link GrammarParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitSubExpr(GrammarParser.SubExprContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code listExpr}
 	 * labeled alternative in {@link GrammarParser#expr}.
