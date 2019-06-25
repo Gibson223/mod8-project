@@ -65,6 +65,71 @@ public class TypeChecker extends GrammarBaseListener {
 	}
 
 //	============================================================
+//	----------------------- Line below -------------------------
+//	============================================================
+
+	//TODO: put variable name in sybol table
+	@Override
+	public void exitDeclLine(GrammarParser.DeclLineContext ctx) {
+		if(ctx.getChildCount() == 3) {
+			ArrayList<Integer> type = this.parseTreeProperty.get(ctx.getChild(0));
+			this.parseTreeProperty.put(ctx, type);
+		} else {
+			ArrayList<Integer> varType = this.parseTreeProperty.get(ctx.getChild(0));
+			ArrayList<Integer> assignType = this.parseTreeProperty.get(ctx.getChild(3));
+			if (!varType.equals(assignType)) {
+				this.error = "Cannot assign to declared variable, wrong variable type; At: ";
+				this.errorOffset = ctx.getStart().getStartIndex();
+				this.errorEnd = ctx.getStop().getStopIndex();
+			}
+			this.parseTreeProperty.put(ctx, varType);
+		}
+
+		if (ctx.exception != null) {
+			this.error = "No valid declaration found; At: ";
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		}
+	}
+
+	@Override
+	public void exitAsgnLine(GrammarParser.AsgnLineContext ctx) {
+		ArrayList<Integer> varType = this.parseTreeProperty.get(ctx.getChild(0));
+		ArrayList<Integer> assignType = this.parseTreeProperty.get(ctx.getChild(2));
+		if (!varType.equals(assignType)) {
+			this.error = "Cannot assign to this variable, wrong variable type; At: ";
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		}
+
+		this.parseTreeProperty.put(ctx, varType);
+
+		if (ctx.exception != null) {
+			this.error = "No valid assignment found; At: ";
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		}
+	}
+
+	//  TODO: implement with the variable symbol table when it is there
+	@Override
+	public void exitLockLine(GrammarParser.LockLineContext ctx) {
+	}
+
+	@Override
+	public void exitFuncallLine(GrammarParser.FuncallLineContext ctx) {
+		//get the (return)type of the function and put it in the parseTree
+		ArrayList<Integer> type = this.parseTreeProperty.get(ctx.getChild(0));
+		this.parseTreeProperty.put(ctx, type);
+
+		if (ctx.exception != null) {
+			this.error = "No valid variable to lock; At: ";
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		}
+	}
+
+// 	============================================================
 //	----------------------- Expr below -------------------------
 //	============================================================
 
@@ -190,13 +255,15 @@ public class TypeChecker extends GrammarBaseListener {
 		}
 	}
 
-	//  TODO: implement with the variable symbol table when it is there
+	//TODO: implement with the variable symbol table when it is there
+	//TODO: put variable name in symbol table
 	@Override
 	public void exitArrExpr(GrammarParser.ArrExprContext ctx) {
 
 	}
 
-	//  TODO: implement with the variable symbol table when it is there
+	//TODO: implement with the variable symbol table when it is there
+	//TODO: put variable name in symbol table
 	@Override
 	public void exitVarExpr(GrammarParser.VarExprContext ctx) {
 
