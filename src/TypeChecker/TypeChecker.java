@@ -65,12 +65,19 @@ public class TypeChecker extends GrammarBaseListener {
 	}
 
 //	============================================================
-//	----------------------- Comp below -------------------------
+//	----------------------- Expr below -------------------------
 //	============================================================
+
+	@Override
+	public void exitParensExpr(GrammarParser.ParensExprContext ctx) {
+		//take the type between the ( ) and put it in the ParseTree
+		ArrayList type = this.parseTreeProperty.get(ctx.getChild(1));
+		this.parseTreeProperty.put(ctx, type);
+	}
 
 	//TODO: implement way for variables to be checked on type of that var when that symbolTable works
 	@Override
-	public void exitComp(GrammarParser.CompContext ctx) {
+	public void exitCompExpr(GrammarParser.CompExprContext ctx) {
 		//check if the left and right hand side of the comparison have the same type
 		ArrayList left = this.parseTreeProperty.get(ctx.getChild(0));
 		ArrayList right = this.parseTreeProperty.get(ctx.getChild(2));
@@ -98,10 +105,16 @@ public class TypeChecker extends GrammarBaseListener {
 			this.errorOffset = ctx.getStart().getStartIndex();
 			this.errorEnd = ctx.getStop().getStopIndex();
 		}
-
 	}
 
-//	============================================================
+	@Override
+	public void exitMultExpr(GrammarParser.MultExprContext ctx) {
+		ArrayList left = this.parseTreeProperty.get(ctx.getChild(0));
+		ArrayList right = this.parseTreeProperty.get(ctx.getChild(2));
+		if (left.get(0) != )
+	}
+
+	//	============================================================
 //	----------------------- Target below -----------------------
 //	============================================================
 
@@ -151,20 +164,20 @@ public class TypeChecker extends GrammarBaseListener {
 		}
 	}
 
-	@Override
-	public void exitChar(GrammarParser.CharContext ctx) {
-		//put the integer list belonging to Char (== [2]) in the parseTree
-		ArrayList<Integer> type = new ArrayList<>();
-		type.add(2);
-		this.parseTreeProperty.put(ctx, type);
-
-		//if an exception happened, give an error message and location
-		if (ctx.exception != null) {
-			this.error = "No valid Char found; At: ";
-			this.errorOffset = ctx.getStart().getStartIndex();
-			this.errorEnd = ctx.getStop().getStopIndex();
-		}
-	}
+//	@Override
+//	public void exitChar(GrammarParser.CharContext ctx) {
+//		//put the integer list belonging to Char (== [2]) in the parseTree
+//		ArrayList<Integer> type = new ArrayList<>();
+//		type.add(2);
+//		this.parseTreeProperty.put(ctx, type);
+//
+//		//if an exception happened, give an error message and location
+//		if (ctx.exception != null) {
+//			this.error = "No valid Char found; At: ";
+//			this.errorOffset = ctx.getStart().getStartIndex();
+//			this.errorEnd = ctx.getStop().getStopIndex();
+//		}
+//	}
 
 	@Override
 	public void exitStr(GrammarParser.StrContext ctx) {
