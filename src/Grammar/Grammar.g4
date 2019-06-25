@@ -30,8 +30,7 @@ expr
     // | (NOT | MIN) expr                      			#notExpr
 	| expr comp expr 									#compExpr
 	| expr TIMES expr 									#multExpr
-	| expr PLUS expr								    #addExpr
-	| expr MIN expr                                     #subExpr
+	| expr (PLUS|MIN) expr								#addorsubExpr
 	| (NUM | TRUE | FALSE | STRING)						#constExpr
 	| VARNAME OSQR expr CSQR							#arrExpr
 	| VARNAME											#varExpr

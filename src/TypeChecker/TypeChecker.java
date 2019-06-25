@@ -74,7 +74,7 @@ public class TypeChecker extends GrammarBaseListener {
 		ArrayList type = this.parseTreeProperty.get(ctx.getChild(1));
 		this.parseTreeProperty.put(ctx, type);
 	}
-	
+
 	//TODO: implement way for variables to be checked on type of that var when that symbolTable works
 	@Override
 	public void exitCompExpr(GrammarParser.CompExprContext ctx) {
@@ -107,7 +107,14 @@ public class TypeChecker extends GrammarBaseListener {
 		}
 	}
 
-//	============================================================
+	@Override
+	public void exitMultExpr(GrammarParser.MultExprContext ctx) {
+		ArrayList left = this.parseTreeProperty.get(ctx.getChild(0));
+		ArrayList right = this.parseTreeProperty.get(ctx.getChild(2));
+		if (left.get(0) != )
+	}
+
+	//	============================================================
 //	----------------------- Target below -----------------------
 //	============================================================
 
