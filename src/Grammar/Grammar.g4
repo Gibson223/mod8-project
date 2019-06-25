@@ -19,7 +19,7 @@ line
 	| WHILE expr OCUR line* CCUR						#whileLine
 	| PARALLEL OCUR line* CCUR                  		#parallelLine
     | SEQUENTIAL OCUR line* CCUR                		#sequentialLine
-    | types VARNAME 
+    | types VARNAME
         (ASGN expr | ASGN functioncall)? SCOL	        #declLine
     | target ASGN (expr | functioncall) SCOL      		#asgnLine
     | (LOCK | UNLOCK) VARNAME SCOL              		#lockLine

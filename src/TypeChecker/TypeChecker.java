@@ -204,9 +204,33 @@ public class TypeChecker extends GrammarBaseListener {
 
 	@Override
 	public void exitListExpr(GrammarParser.ListExprContext ctx) {
+		//check if the types at all indices are the same
+		ArrayList<Integer> first = this.parseTreeProperty.get(ctx.getChild(1));
+		int childCount = ctx.getChildCount();
+		if (childCount > 3) {
+			for (int i = 3; i < childCount - 1; i += 2) {
+				ArrayList current = this.parseTreeProperty.get(ctx.getChild(i));
+				if (!first.equals(current)) {
+					this.error = "Arrays cannot contain different types; At: ";
+					this.errorOffset = ctx.getStart().getStartIndex();
+					this.errorEnd = ctx.getStop().getStopIndex();
+					break;
+				}
+			}
+		}
+
+		//add an array around the type of the first index
+		//put that type in the parseTree
 		ArrayList<Integer> type = new ArrayList<>();
-		ArrayList first = this.parseTreeProperty.get(ctx.getChild(1));
-		ctx.getChildCount();
+		type.add(4);
+		type.addAll(first);
+		this.parseTreeProperty.put(ctx, type);
+
+		if (ctx.exception != null) {
+			this.error = "No valid array found; At: ";
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		}
 	}
 
 	//	============================================================
