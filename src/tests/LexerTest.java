@@ -79,7 +79,11 @@ public class LexerTest {
 
     @Test
     public void whileTest() {
-        correctline("while a[0] < 10; {}");
+        correctline("while a[0] < 10 {}");
+        correctline("while true {sequential {parallel {Int a = 5;}}}");
+        wrongline("while true; {sequential {parallel {Int a = 5;}}}");
+        wrongline("while {}");
+        correctline("while true {}");
     }
     @Test //#parallelLine
     public void parallelTest() {
@@ -100,7 +104,7 @@ public class LexerTest {
         // parallel with lines
         correctline("sequential { Int a = 5; Bool s;}");
     }
-
+    
     @Test //#decLine & asgnLine
     public void TypeAndAssign() {
         correctline("Int a = 10;Int b; Int c = a;");
@@ -115,6 +119,9 @@ public class LexerTest {
         correctline("Str a = \"lalala\";");
         correctline("Str a = \"a\"; Str b = \"b\"; aAndb = \"ab\"");
         wrongline("Str a aaaa;");
+//        wrongline("Str a = '7';"); this is already a typerror != syntaxerror
+        wrongline("l = 'lala\";");
+        correctline("l = \"lalala\";");
 
         // arrays
         correctline("Bool a = [1,2,3];"); // assigning arr to not arr type is allowed TODO right??
@@ -242,6 +249,7 @@ public class LexerTest {
         return parser;
     }
     private static boolean check(Parser parser) {
+        System.out.println(parser.getNumberOfSyntaxErrors());
         return parser.getNumberOfSyntaxErrors() == 0;
     }
 
