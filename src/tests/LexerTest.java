@@ -22,7 +22,7 @@ public class LexerTest {
                         "}");
         // with returns
         correctfun("Fun Int Name arg1 arg2 {Int x = 19;a[5] = 10;}");
-        correctfun("Fun Char Name arg1 arg2 {\n" +
+        correctfun("Fun Bool Name arg1 arg2 {\n" +
                     "   x = 1;" +
                     "   parallel {" +
                     "       sequential {lock x;x = 4;unlock x;y = 2;z = 3;}\n" +
@@ -37,15 +37,13 @@ public class LexerTest {
 
     @Test
     public void returnTest() {
-        String validproglines = "Fun Name arg1 arg2 arg3 { Int a = 4; Char c = 'c'; parallel {}";
+        String validproglines = "Fun Name arg1 arg2 arg3 { Int a = 4; Bool c = 'c'; parallel {}";
         correctfun(validproglines +"return x}");
         wrongfun(validproglines +"Return x}");
         wrongfun(validproglines +"return x,y,z;}");
         wrongfun(validproglines +"return x[1,2];}");
         wrongfun(validproglines +"return Int x = 7;}");
     }
-
-
 
     //^^^^^^^^^^^^^^^^^^^^functionTests^^^^^^^^^^^^^^^^
     @Test //#ifLine
@@ -58,7 +56,7 @@ public class LexerTest {
         correctline("if 5 {for i; i > 10 ; i = i -5; {a =10;}}");// TODO move to nesting
         // mandatory if
         wrongline("else {Int a = 5}");
-        wrongline("elif 5 {Char b = 7;} ");
+        wrongline("elif 5 {Bool b = 7;} ");
 
     }
 
@@ -74,12 +72,15 @@ public class LexerTest {
         correctline("for i = 5; i < 10; i = i+1; {Int a = 5;}");
         // incorrect types
         wrongline("for Bool a; i < 10; i = i+1; {Int a = 5;}");
-        wrongline("for Arr Char a; i < 10; i = i+1; {Int a = 5;}");
+        wrongline("for Arr Bool a; i < 10; i = i+1; {Int a = 5;}");
         //empty for body
         correctline("for Int a; i < 10; i = i+1; {}");
     }
 
-
+    @Test
+    public void whileTest() {
+        correctline("while a[0] < 10; {}");
+    }
     @Test //#parallelLine
     public void parallelTest() {
         // empty
@@ -87,7 +88,7 @@ public class LexerTest {
         // valid nesting parallel
         correctline("parallel {parallel {}}");
         // parallel with lines
-        correctline("parallel { Int a = 5; Char s;}");
+        correctline("parallel { Int a = 5; Bool s;}");
     }
 
     @Test //#sequentialLine
@@ -97,7 +98,7 @@ public class LexerTest {
         // valid nesting parallel
         correctline("sequential {sequential {}}");
         // parallel with lines
-        correctline("sequential { Int a = 5; Char s;}");
+        correctline("sequential { Int a = 5; Bool s;}");
     }
 
     @Test //#decLine & asgnLine
@@ -107,17 +108,27 @@ public class LexerTest {
         correctline("Bool a= c;");
 
         wrongline("in t =23;");
-        wrongline("Char a == 4;");
+        wrongline("Bool a == 4;");
         wrongline("Int a");
         // str is a valid varname
         correctline("str = 5;");
+        correctline("Str a = \"lalala\";");
+        correctline("Str a = \"a\"; Str b = \"b\"; aAndb = \"ab\"");
+        wrongline("Str a aaaa;");
 
         // arrays
-        correctline("Char a = [1,2,3];"); // assigning arr to not arr type is allowed TODO right??
-        wrongline("Char a = 5");
+        correctline("Bool a = [1,2,3];"); // assigning arr to not arr type is allowed TODO right??
+        wrongline("Bool a = 5");
         correctline("Arr Int a = [];Arr Int a = c;");
         correctline("Arr Int a = [1,2,3,4];");
         wrongline("Arr Int a = 1 2 3 ;");
+
+        // function assignment
+        correctline("Int a = Fib 5;");
+        wrongline("Str a, b  = Tuple a b ;");
+        wrongline("Arr Str a[0]  = Tuple a b ;");
+        correctline("Arr Str a  = Tuple a b ;");
+        wrongline("Str a, b  = Tuple a b ");
     }
 
     @Test  //#declLine
@@ -125,7 +136,7 @@ public class LexerTest {
         correctline("Int a;Int b; Int c;");
         correctline("Int a;");
         correctline("Bool a;");
-        correctline("Char a;");
+        correctline("Bool a;");
         correctline("Str a;");
         correctline("Arr Int a;");
         correctline("Int a;Arr Int a;");
@@ -151,7 +162,7 @@ public class LexerTest {
         // seen as a valid
         correctline("Unlock x;"); // TODO maybe find way to exclude otherwise move to fnctioncall
         wrongline("lock Int x = 5;");
-        wrongline("lock Char x = [1,2,3,4]");
+        wrongline("lock Bool x = [1,2,3,4]");
     }
 
     //^^^^^^^^^^^^^^^^^^^^LineTests^^^^^^^^^^^^^^^^
