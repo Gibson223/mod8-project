@@ -3,16 +3,16 @@ package TypeChecker;
 import java.util.*;
 
 public class SymbolTable {
-    public innertable root;
-    public innertable currentscope;
+    public InnerTable root;
+    public InnerTable currentscope;
 
     public SymbolTable() {
-//        this.root = new innertable();
+//        this.root = new InnerTable();
 //        this.currentscope = root;
     }
     public SymbolTable(boolean str) {
         if (str) {
-            this.root = new innertable();
+            this.root = new InnerTable();
         }else {
             this.root = null;
         }
@@ -21,10 +21,10 @@ public class SymbolTable {
 
     public void openScope() {
         if (this.root == null) {
-            this.root = new innertable();
+            this.root = new InnerTable();
             this.currentscope = root;
         } else {
-            innertable child = new innertable(currentscope);
+            InnerTable child = new InnerTable(currentscope);
             this.currentscope = child;
         }
     }
@@ -36,8 +36,8 @@ public class SymbolTable {
         this.currentscope = this.currentscope.parent;
     }
 
-    public ArrayList<Integer> gettype(String id) {
-        innertable curr = currentscope;
+    public ArrayList<Integer> getType(String id) {
+        InnerTable curr = currentscope;
         while (curr != root) {
             if (curr.contains(id)) {
                 return curr.list.get(id);
@@ -55,7 +55,7 @@ public class SymbolTable {
     }
 
     public boolean contains(String id) {
-        innertable curr = currentscope;
+        InnerTable curr = currentscope;
         while (curr != root) {
             if (curr.contains(id)) {
                 return true;
@@ -69,13 +69,13 @@ public class SymbolTable {
         return this.currentscope.contains(id);
     }
 
-    class innertable{
+    class InnerTable{
         public HashMap<String, ArrayList<Integer>> list = new HashMap<>();
-        public innertable parent;
-        public innertable(innertable parent) {
+        public InnerTable parent;
+        public InnerTable(InnerTable parent) {
             this.parent = parent;
         }
-        public innertable(){
+        public InnerTable(){
             this.parent = null;
         }
         public boolean add(String id, ArrayList<Integer> type) {
