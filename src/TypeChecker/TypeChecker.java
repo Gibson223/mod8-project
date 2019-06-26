@@ -31,16 +31,13 @@ public class TypeChecker extends GrammarBaseListener {
 //	The types belonging to each int are as follows:
 //	0 = Int
 //	1 = Boolean
-//	2 = Char
+//	2 = Char (currently unused)
 //	3 = String
 //	4 = Array
-//  TODO: check if number 5 will work this way
-//	5 = variable
 //
 //	Some examples:
 //	Int is given as [0]
 //	Array Array Int is given as [4, 4, 0]
-//	a variable of type Int is given as [5,0]
 
 	public String decideType(String expression) throws ParseException {
 		String typeString = null;
@@ -68,7 +65,58 @@ public class TypeChecker extends GrammarBaseListener {
 //	----------------------- Line below -------------------------
 //	============================================================
 
+	//TODO: open scope
+	@Override
+	public void enterIfLine(GrammarParser.IfLineContext ctx) {
 
+	}
+	//TODO: check if the for loop with expr works as expected
+	//TODO: close scope
+	@Override
+	public void exitIfLine(GrammarParser.IfLineContext ctx) {
+		List<GrammarParser.ExprContext> exprs = ctx.expr();
+		for(GrammarParser.ExprContext expr : exprs) {
+			ArrayList type = this.parseTreeProperty.get(expr);
+			if(!type.get(0).equals(1)) {
+				this.error = "If or Elif conditions have to be a boolean; At: ";
+				this.errorOffset = ctx.getStart().getStartIndex();
+				this.errorEnd = ctx.getStop().getStopIndex();
+			}
+		}
+		//nothing to put in the parseTree
+
+		if (ctx.exception != null) {
+			this.error = "No valid If found; At: ";
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		}
+	}
+
+	//TODO: open scope
+	@Override
+	public void enterForLine(GrammarParser.ForLineContext ctx) {
+
+	}
+	//TODO: implement
+	//TODO: put variable in the symbol table
+	//TODO: close scope
+	@Override
+	public void exitForLine(GrammarParser.ForLineContext ctx) {
+
+
+		if (ctx.exception != null) {
+			this.error = "No valid If found; At: ";
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		}
+	}
+
+	//TODO: open scope
+	@Override
+	public void enterWhileLine(GrammarParser.WhileLineContext ctx) {
+
+	}
+	//TODO: close scope
 	@Override
 	public void exitWhileLine(GrammarParser.WhileLineContext ctx) {
 		ArrayList type = this.parseTreeProperty.get(ctx.getChild(1));
@@ -77,22 +125,31 @@ public class TypeChecker extends GrammarBaseListener {
 			this.errorOffset = ctx.getStart().getStartIndex();
 			this.errorEnd = ctx.getStop().getStopIndex();
 		}
-
 		//nothing to put in the parseTree
 
 		if (ctx.exception != null) {
-			this.error = "No valid while loop found; At: ";
+			this.error = "No valid While loop found; At: ";
 			this.errorOffset = ctx.getStart().getStartIndex();
 			this.errorEnd = ctx.getStop().getStopIndex();
 		}
 	}
 
+	//TODO: open scope
+	@Override
+	public void enterParallelLine(GrammarParser.ParallelLineContext ctx) {
+
+	}
 	//TODO: close scope
 	@Override
 	public void exitParallelLine(GrammarParser.ParallelLineContext ctx) {
 		//nothing to typecheck
 	}
 
+	//TODO: open scope
+	@Override
+	public void enterSequentialLine(GrammarParser.SequentialLineContext ctx) {
+
+	}
 	//TODO: close scope
 	@Override
 	public void exitSequentialLine(GrammarParser.SequentialLineContext ctx) {
@@ -380,21 +437,6 @@ public class TypeChecker extends GrammarBaseListener {
 			this.errorEnd = ctx.getStop().getStopIndex();
 		}
 	}
-
-//	@Override
-//	public void exitChar(GrammarParser.CharContext ctx) {
-//		//put the integer list belonging to Char (== [2]) in the parseTree
-//		ArrayList<Integer> type = new ArrayList<>();
-//		type.add(2);
-//		this.parseTreeProperty.put(ctx, type);
-//
-//		//if an exception happened, give an error message and location
-//		if (ctx.exception != null) {
-//			this.error = "No valid Char found; At: ";
-//			this.errorOffset = ctx.getStart().getStartIndex();
-//			this.errorEnd = ctx.getStop().getStopIndex();
-//		}
-//	}
 
 	@Override
 	public void exitStr(GrammarParser.StrContext ctx) {
