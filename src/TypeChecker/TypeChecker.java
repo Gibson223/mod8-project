@@ -68,6 +68,37 @@ public class TypeChecker extends GrammarBaseListener {
 //	----------------------- Line below -------------------------
 //	============================================================
 
+
+	@Override
+	public void exitWhileLine(GrammarParser.WhileLineContext ctx) {
+		ArrayList type = this.parseTreeProperty.get(ctx.getChild(1));
+		if(!type.get(0).equals(1)) {
+			this.error = "While loop condition has to be a boolean; At: ";
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		}
+
+		//nothing to put in the parseTree
+
+		if (ctx.exception != null) {
+			this.error = "No valid while loop found; At: ";
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		}
+	}
+
+	//TODO: close scope
+	@Override
+	public void exitParallelLine(GrammarParser.ParallelLineContext ctx) {
+		//nothing to typecheck
+	}
+
+	//TODO: close scope
+	@Override
+	public void exitSequentialLine(GrammarParser.SequentialLineContext ctx) {
+		//nothing to typecheck
+	}
+
 	//TODO: put variable name in sybol table
 	@Override
 	public void exitDeclLine(GrammarParser.DeclLineContext ctx) {

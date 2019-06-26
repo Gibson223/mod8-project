@@ -11,9 +11,13 @@ line
 	: IF expr OCUR line* CCUR
 		(ELIF expr OCUR line* CCUR)*
 		(ELSE OCUR line* CCUR)?							#ifLine
-	| FOR INT? VARNAME
-		(ASGN expr)? SCOL
-		expr SCOL 
+//	| FOR INT? VARNAME
+//		(ASGN expr)? SCOL
+//		expr SCOL
+//		VARNAME ASGN expr SCOL
+//		OCUR line* CCUR									#forLine
+	| FOR (VARNAME | INT VARNAME ASGN expr) SCOL
+		expr SCOL
 		VARNAME ASGN expr SCOL
 		OCUR line* CCUR									#forLine
 	| WHILE expr OCUR line* CCUR						#whileLine
