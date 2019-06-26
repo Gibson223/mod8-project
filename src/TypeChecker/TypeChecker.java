@@ -7,7 +7,6 @@ import Grammar.GrammarParser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -353,18 +352,51 @@ public class TypeChecker extends GrammarBaseListener {
 		}
 	}
 
-	//TODO: implement with the variable symbol table when it is there
-	//TODO: put variable name in symbol table
 	@Override
 	public void exitArrExpr(GrammarParser.ArrExprContext ctx) {
+		String varName = ctx.VARNAME().getSymbol().getText();
+		if(variableTable.contains(varName)) {
+			ArrayList<Integer> type = variableTable.getType(varName);
+			if(!type.get(0).equals(4)) {
+				ArrayList<Integer> newType = new ArrayList<>(type.subList(1, type.size()));
+				this.parseTreeProperty.put(ctx, type);
+			} else {
+				this.error = "Variable is not an Arr; At: ";
+				this.errorOffset = ctx.getStart().getStartIndex();
+				this.errorEnd = ctx.getStop().getStopIndex();
+			}
+		} else {
+			this.error = "Variable does not exist; At: ";
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		}
+		//TODO: will currently give nullpointer exceptions if the variable does not exist as no type can be put in the parseTree
 
+		if (ctx.exception != null) {
+			this.error = "No valid Arr variable found; At: ";
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		}
 	}
 
-	//TODO: implement with the variable symbol table when it is there
-	//TODO: put variable name in symbol table
 	@Override
 	public void exitVarExpr(GrammarParser.VarExprContext ctx) {
+		String varName = ctx.VARNAME().getSymbol().getText();
+		if(variableTable.contains(varName)) {
+			ArrayList<Integer> type = variableTable.getType(varName);
+			this.parseTreeProperty.put(ctx,type);
+		} else {
+			this.error = "Variable does not exist; At: ";
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		}
+		//TODO: will currently give nullpointer exceptions if the variable does not exist as no type can be put in the parseTree
 
+		if (ctx.exception != null) {
+			this.error = "No valid variable found; At: ";
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		}
 	}
 
 	@Override
@@ -401,17 +433,52 @@ public class TypeChecker extends GrammarBaseListener {
 	//	============================================================
 //	----------------------- Target below -----------------------
 //	============================================================
-
-	//  TODO: implement with the variable symbol table when it is there
+	
 	@Override
 	public void exitVarTarget(GrammarParser.VarTargetContext ctx) {
+		String varName = ctx.VARNAME().getSymbol().getText();
+		if(variableTable.contains(varName)) {
+			ArrayList<Integer> type = variableTable.getType(varName);
+			this.parseTreeProperty.put(ctx,type);
+		} else {
+			this.error = "Variable does not exist; At: ";
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		}
+		//TODO: will currently give nullpointer exceptions if the variable does not exist as no type can be put in the parseTree
 
+		if (ctx.exception != null) {
+			this.error = "No valid variable found; At: ";
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		}
 	}
 
-	//  TODO: implement with the variable symbol table when it is there
 	@Override
 	public void exitArrayTarget(GrammarParser.ArrayTargetContext ctx) {
+		String varName = ctx.VARNAME().getSymbol().getText();
+		if(variableTable.contains(varName)) {
+			ArrayList<Integer> type = variableTable.getType(varName);
+			if(!type.get(0).equals(4)) {
+				ArrayList<Integer> newType = new ArrayList<>(type.subList(1, type.size()));
+				this.parseTreeProperty.put(ctx, type);
+			} else {
+				this.error = "Variable is not an Arr; At: ";
+				this.errorOffset = ctx.getStart().getStartIndex();
+				this.errorEnd = ctx.getStop().getStopIndex();
+			}
+		} else {
+			this.error = "Variable does not exist; At: ";
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		}
+		//TODO: will currently give nullpointer exceptions if the variable does not exist as no type can be put in the parseTree
 
+		if (ctx.exception != null) {
+			this.error = "No valid Arr variable found; At: ";
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		}
 	}
 
 //	============================================================
