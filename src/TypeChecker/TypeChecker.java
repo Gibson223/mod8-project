@@ -97,15 +97,24 @@ public class TypeChecker extends GrammarBaseListener {
 	public void enterForLine(GrammarParser.ForLineContext ctx) {
 
 	}
-	//TODO: implement
 	//TODO: put variable in the symbol table
 	//TODO: close scope
 	@Override
 	public void exitForLine(GrammarParser.ForLineContext ctx) {
+		if(ctx.INT().getSymbol() != null) {
+			ArrayList<Integer> type = this.parseTreeProperty.get(ctx.getChild(4));
+			if(!type.get(0).equals(1)) {
+				this.error = "No valid For loop found; At: ";
+				this.errorOffset = ctx.getStart().getStartIndex();
+				this.errorEnd = ctx.getStop().getStopIndex();
+			}
+		} else {
+			//TODO: implement if variable is only a name
+		}
 
 
 		if (ctx.exception != null) {
-			this.error = "No valid If found; At: ";
+			this.error = "No valid For loop found; At: ";
 			this.errorOffset = ctx.getStart().getStartIndex();
 			this.errorEnd = ctx.getStop().getStopIndex();
 		}
@@ -224,8 +233,14 @@ public class TypeChecker extends GrammarBaseListener {
 	@Override
 	public void exitParensExpr(GrammarParser.ParensExprContext ctx) {
 		//take the type between the ( ) and put it in the ParseTree
-		ArrayList type = this.parseTreeProperty.get(ctx.getChild(1));
+		ArrayList<Integer> type = this.parseTreeProperty.get(ctx.getChild(1));
 		this.parseTreeProperty.put(ctx, type);
+
+		if (ctx.exception != null) {
+			this.error = "No valid parentheses expression; At: ";
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		}
 	}
 
 	@Override

@@ -2,15 +2,15 @@ package TypeChecker;
 
 import java.util.*;
 
-public class symtable{
+public class SymbolTable {
     public innertable root;
     public innertable currentscope;
 
-    public symtable() {
+    public SymbolTable() {
 //        this.root = new innertable();
 //        this.currentscope = root;
     }
-    public symtable(boolean str) {
+    public SymbolTable(boolean str) {
         if (str) {
             this.root = new innertable();
         }else {
@@ -36,7 +36,7 @@ public class symtable{
         this.currentscope = this.currentscope.parent;
     }
 
-    public List<int> gettype(String id) {
+    public ArrayList<Integer> gettype(String id) {
         innertable curr = currentscope;
         while (curr != root) {
             if (curr.contains(id)) {
@@ -47,10 +47,10 @@ public class symtable{
         if (this.root.contains(id)) {
             return this.root.list.get(id);
         }
-        return SHOULD BE REPLACED BY THE ERROR TYPE; // TODO should be replaced by valid error type or if
+        return null; // TODO should be replaced by valid error type or if
     }
 
-    public boolean add(String id, List<int> type) {
+    public boolean add(String id, ArrayList<Integer> type) {
         return this.currentscope.add(id, type);
     }
 
@@ -70,7 +70,7 @@ public class symtable{
     }
 
     class innertable{
-        public HashMap<String, List<int>> list = new HashMap<>();
+        public HashMap<String, ArrayList<Integer>> list = new HashMap<>();
         public innertable parent;
         public innertable(innertable parent) {
             this.parent = parent;
@@ -78,7 +78,7 @@ public class symtable{
         public innertable(){
             this.parent = null;
         }
-        public boolean add(String id, List<int> type) {
+        public boolean add(String id, ArrayList<Integer> type) {
             if (this.list.containsKey(id)) {
                 return false;
             }
