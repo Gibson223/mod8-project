@@ -23,6 +23,7 @@ public class TypeChecker extends GrammarBaseListener {
 	private String error;
 	private int errorOffset;
 	private int errorEnd;
+	private SymbolTable variableTable = new SymbolTable();
 
 //	Types are given in the form of an array.
 //	This array declares what the thing or type is in the first index.
@@ -65,13 +66,11 @@ public class TypeChecker extends GrammarBaseListener {
 //	----------------------- Line below -------------------------
 //	============================================================
 
-	//TODO: open scope
 	@Override
 	public void enterIfLine(GrammarParser.IfLineContext ctx) {
-
+		variableTable.openScope();
 	}
 	//TODO: check if the for loop with expr works as expected
-	//TODO: close scope
 	@Override
 	public void exitIfLine(GrammarParser.IfLineContext ctx) {
 		List<GrammarParser.ExprContext> exprs = ctx.expr();
@@ -84,6 +83,7 @@ public class TypeChecker extends GrammarBaseListener {
 			}
 		}
 		//nothing to put in the parseTree
+		variableTable.closeScope();
 
 		if (ctx.exception != null) {
 			this.error = "No valid If found; At: ";
@@ -92,13 +92,11 @@ public class TypeChecker extends GrammarBaseListener {
 		}
 	}
 
-	//TODO: open scope
 	@Override
 	public void enterForLine(GrammarParser.ForLineContext ctx) {
-
+		variableTable.openScope();
 	}
 	//TODO: put variable in the symbol table
-	//TODO: close scope
 	@Override
 	public void exitForLine(GrammarParser.ForLineContext ctx) {
 		if(ctx.INT().getSymbol() != null) {
@@ -111,7 +109,7 @@ public class TypeChecker extends GrammarBaseListener {
 		} else {
 			//TODO: implement if variable is only a name
 		}
-
+		variableTable.closeScope();
 
 		if (ctx.exception != null) {
 			this.error = "No valid For loop found; At: ";
@@ -120,12 +118,10 @@ public class TypeChecker extends GrammarBaseListener {
 		}
 	}
 
-	//TODO: open scope
 	@Override
 	public void enterWhileLine(GrammarParser.WhileLineContext ctx) {
-
+		variableTable.openScope();
 	}
-	//TODO: close scope
 	@Override
 	public void exitWhileLine(GrammarParser.WhileLineContext ctx) {
 		ArrayList type = this.parseTreeProperty.get(ctx.getChild(1));
@@ -135,6 +131,7 @@ public class TypeChecker extends GrammarBaseListener {
 			this.errorEnd = ctx.getStop().getStopIndex();
 		}
 		//nothing to put in the parseTree
+		variableTable.closeScope();
 
 		if (ctx.exception != null) {
 			this.error = "No valid While loop found; At: ";
@@ -143,26 +140,24 @@ public class TypeChecker extends GrammarBaseListener {
 		}
 	}
 
-	//TODO: open scope
 	@Override
 	public void enterParallelLine(GrammarParser.ParallelLineContext ctx) {
-
+		variableTable.openScope();
 	}
-	//TODO: close scope
 	@Override
 	public void exitParallelLine(GrammarParser.ParallelLineContext ctx) {
 		//nothing to typecheck
+		variableTable.closeScope();
 	}
 
-	//TODO: open scope
 	@Override
 	public void enterSequentialLine(GrammarParser.SequentialLineContext ctx) {
-
+		variableTable.openScope();
 	}
-	//TODO: close scope
 	@Override
 	public void exitSequentialLine(GrammarParser.SequentialLineContext ctx) {
 		//nothing to typecheck
+		variableTable.closeScope();
 	}
 
 	//TODO: put variable name in sybol table
