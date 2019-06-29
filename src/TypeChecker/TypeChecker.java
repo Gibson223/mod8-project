@@ -155,7 +155,7 @@ public class TypeChecker extends GrammarBaseListener {
 			return;
 		}
 
-		if(ctx.INT().getSymbol() != null) {
+		if(ctx.INT() != null) {
 			ArrayList<Integer> type = this.parseTreeProperty.get(ctx.getChild(4));
 			if(!type.get(0).equals(1)) {
 				this.error = "No valid For loop found; At: ";
@@ -443,15 +443,17 @@ public class TypeChecker extends GrammarBaseListener {
 		ArrayList right = this.parseTreeProperty.get(ctx.getChild(2));
 		ArrayList<Integer> type = new ArrayList<>();
 		//addition or subtraction
-		if (ctx.PLUS().getSymbol() != null) {
+		if (ctx.PLUS() != null) {
 			//addition
-			if(!(left.get(0).equals(0) && right.get(0).equals(0)) || !(left.get(0).equals(3) && right.get(0).equals(3))) {
+			boolean leftEqualsRightInt = left.get(0).equals(0) && right.get(0).equals(0);
+			boolean leftEqualsRightString = left.get(0).equals(3) && right.get(0).equals(3);
+			if(!leftEqualsRightInt && !leftEqualsRightString) {
 				//not both types are int, or not both types are string
 				this.error = "Only two Int or two String types can be added; At: ";
 				this.errorOffset = ctx.getStart().getStartIndex();
 				this.errorEnd = ctx.getStop().getStopIndex();
 			}
-		} else if (ctx.MIN().getSymbol() != null) {
+		} else if (ctx.MIN() != null) {
 			//subtraction
 			if (!(left.get(0).equals(0) && right.get(0).equals(0))) {
 				//not both types are int
@@ -472,7 +474,7 @@ public class TypeChecker extends GrammarBaseListener {
 		this.parseTreeProperty.put(ctx, type);
 
 		if (ctx.exception != null) {
-			this.error = "Only Int types can be multiplied; At: ";
+			this.error = "Only two Int types can be multiplied; At: ";
 			this.errorOffset = ctx.getStart().getStartIndex();
 			this.errorEnd = ctx.getStop().getStopIndex();
 		}
@@ -487,9 +489,9 @@ public class TypeChecker extends GrammarBaseListener {
 
 		//no types to check, but do put the right type in the parseTree
 		ArrayList<Integer> type = new ArrayList<>();
-		if(ctx.NUM().getSymbol() != null) {
+		if(ctx.NUM() != null) {
 			type.add(0);
-		} else if (ctx.STRING().getSymbol() != null) {
+		} else if(ctx.STRING() != null) {
 			type.add(3);
 		} else {
 			type.add(1);

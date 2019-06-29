@@ -25,8 +25,30 @@ public class TypeCheckerTest {
 
 	@Test
 	public void exprTest() {
-		expr("1*1", true);
 		expr("(1*1)", true);
+		expr("(true)", true);
+		expr("1*1", true);
+		expr("1*\"hello\"", false);
+		expr("1+1", true);
+		expr("\"x\" + \"y\"", true);
+		expr("1+false", false);
+		expr("1+1*3", true);
+		expr("(1+1)*3", true);
+		expr("1-1", true);
+		expr("\"x\" - \"y\"", false);
+		expr("1-true", false);
+		expr("1-1*3", true);
+		expr("(1-1)*3", true);
+		expr("[1]", true);
+		expr("[1,2,3]", true);
+		expr("[1,2,true]", false);
+		expr("[1,1+1,1+1+1]", true);
+		expr("[true, false, false]", true);
+		expr("[\"x\", \"y\", \"z\"]", true);
+		expr("[]", false);
+		expr("[[],[]]", false);
+		expr("[[1],[1]]", true);
+		expr("[[1],[(1+1)]]", true);
 	}
 
 	private static void types(String s, boolean bool) {
@@ -58,7 +80,7 @@ public class TypeCheckerTest {
 
 	private static boolean noErrors(Parser parser, ParseTree parseTree, String s) {
 		if (parser.getNumberOfSyntaxErrors() != 0) {
-			System.out.println("Rejected because of Syntax Error(s)");
+			System.out.println("Rejected because of Syntax Error(s) " + s);
 			return false;
 		} else {
 			ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
@@ -66,8 +88,7 @@ public class TypeCheckerTest {
 			parseTreeWalker.walk(typeChecker, parseTree);
 
 			if(!typeChecker.typeCorrect()) {
-				System.out.println("Rejected because of Type Error(s)");
-				System.out.println(typeChecker.getError(s));
+				System.out.println("Rejected because of Type Error(s) -> " + typeChecker.getError(s));
 				return false;
 			} else {
 				return true;
