@@ -61,17 +61,59 @@ public class TypeChecker extends GrammarBaseListener {
 		return typeString;
 	}
 
+	public TypeChecker() {
+		this.parseTreeProperty = new ParseTreeProperty<>();
+	}
+
+	public String getError() {
+		return this.error + " " + this.errorOffset + " - " + this.errorEnd;
+	}
+
+	public String getError(String expression) {
+		String errorSpot = expression.substring(this.errorOffset, this.errorEnd+1);
+		return this.error + errorSpot + "; Index in input: " + this.errorEnd + ";";
+	}
+
+	public boolean typeCorrect() {
+		return this.error == null;
+	}
+
 //	============================================================
+//	--------------------- Function below -----------------------
+//	============================================================
+
+	@Override
+	public void exitFunction(GrammarParser.FunctionContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
+		String funName = ctx.FUNNAME().getSymbol().getText();
+		ArrayList<Integer> funType = null;
+	}
+
+// 	============================================================
 //	----------------------- Line below -------------------------
 //	============================================================
 
 	@Override
 	public void enterIfLine(GrammarParser.IfLineContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
 		variableTable.openScope();
 	}
 	//TODO: check if the for loop with expr works as expected
 	@Override
 	public void exitIfLine(GrammarParser.IfLineContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
 		List<GrammarParser.ExprContext> exprs = ctx.expr();
 		for(GrammarParser.ExprContext expr : exprs) {
 			ArrayList type = this.parseTreeProperty.get(expr);
@@ -93,11 +135,26 @@ public class TypeChecker extends GrammarBaseListener {
 
 	@Override
 	public void enterForLine(GrammarParser.ForLineContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
 		variableTable.openScope();
+		String varName = ctx.VARNAME(0).getSymbol().getText();
+		//in for, the type of the declared var should always be an int
+		ArrayList<Integer> type = new ArrayList<>();
+		type.add(0);
+		variableTable.add(varName, type);
 	}
-	//TODO: put variable in the symbol table
+	//TODO: second varname check
 	@Override
 	public void exitForLine(GrammarParser.ForLineContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
 		if(ctx.INT().getSymbol() != null) {
 			ArrayList<Integer> type = this.parseTreeProperty.get(ctx.getChild(4));
 			if(!type.get(0).equals(1)) {
@@ -106,7 +163,16 @@ public class TypeChecker extends GrammarBaseListener {
 				this.errorEnd = ctx.getStop().getStopIndex();
 			}
 		} else {
-			//TODO: implement if variable is only a name
+			//TODO: check if the varname will always work this way
+			String varName = ctx.VARNAME(0).getSymbol().getText();
+			if (variableTable.contains(varName)) {
+				ArrayList<Integer> type = variableTable.getType(varName);
+				this.parseTreeProperty.put(ctx,type);
+			} else {
+				this.error = "Variable does not exist; At: ";
+				this.errorOffset = ctx.getStart().getStartIndex();
+				this.errorEnd = ctx.getStop().getStopIndex();
+			}
 		}
 		variableTable.closeScope();
 
@@ -119,10 +185,20 @@ public class TypeChecker extends GrammarBaseListener {
 
 	@Override
 	public void enterWhileLine(GrammarParser.WhileLineContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
 		variableTable.openScope();
 	}
 	@Override
 	public void exitWhileLine(GrammarParser.WhileLineContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
 		ArrayList type = this.parseTreeProperty.get(ctx.getChild(1));
 		if(!type.get(0).equals(1)) {
 			this.error = "While loop condition has to be a boolean; At: ";
@@ -141,40 +217,64 @@ public class TypeChecker extends GrammarBaseListener {
 
 	@Override
 	public void enterParallelLine(GrammarParser.ParallelLineContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
 		variableTable.openScope();
 	}
 	@Override
 	public void exitParallelLine(GrammarParser.ParallelLineContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
 		//nothing to typecheck
 		variableTable.closeScope();
 	}
 
 	@Override
 	public void enterSequentialLine(GrammarParser.SequentialLineContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
 		variableTable.openScope();
 	}
 	@Override
 	public void exitSequentialLine(GrammarParser.SequentialLineContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
 		//nothing to typecheck
 		variableTable.closeScope();
 	}
 
-	//TODO: put variable name in sybol table
 	@Override
 	public void exitDeclLine(GrammarParser.DeclLineContext ctx) {
-		if(ctx.getChildCount() == 3) {
-			ArrayList<Integer> type = this.parseTreeProperty.get(ctx.getChild(0));
-			this.parseTreeProperty.put(ctx, type);
-		} else {
-			ArrayList<Integer> varType = this.parseTreeProperty.get(ctx.getChild(0));
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
+		ArrayList<Integer> type = this.parseTreeProperty.get(ctx.getChild(0));
+		if(ctx.getChildCount() != 3) {
 			ArrayList<Integer> assignType = this.parseTreeProperty.get(ctx.getChild(3));
-			if (!varType.equals(assignType)) {
+			if (!type.equals(assignType)) {
 				this.error = "Cannot assign to declared variable, wrong variable type; At: ";
 				this.errorOffset = ctx.getStart().getStartIndex();
 				this.errorEnd = ctx.getStop().getStopIndex();
 			}
-			this.parseTreeProperty.put(ctx, varType);
 		}
+		this.parseTreeProperty.put(ctx, type);
+		//add the newly declared variable to the variableTable
+		String varName = ctx.VARNAME().getSymbol().getText();
+		variableTable.add(varName, type);
 
 		if (ctx.exception != null) {
 			this.error = "No valid declaration found; At: ";
@@ -185,6 +285,11 @@ public class TypeChecker extends GrammarBaseListener {
 
 	@Override
 	public void exitAsgnLine(GrammarParser.AsgnLineContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
 		ArrayList<Integer> varType = this.parseTreeProperty.get(ctx.getChild(0));
 		ArrayList<Integer> assignType = this.parseTreeProperty.get(ctx.getChild(2));
 		if (!varType.equals(assignType)) {
@@ -192,7 +297,6 @@ public class TypeChecker extends GrammarBaseListener {
 			this.errorOffset = ctx.getStart().getStartIndex();
 			this.errorEnd = ctx.getStop().getStopIndex();
 		}
-
 		this.parseTreeProperty.put(ctx, varType);
 
 		if (ctx.exception != null) {
@@ -202,13 +306,35 @@ public class TypeChecker extends GrammarBaseListener {
 		}
 	}
 
-	//  TODO: implement with the variable symbol table when it is there
 	@Override
 	public void exitLockLine(GrammarParser.LockLineContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
+		String varName = ctx.VARNAME().getSymbol().getText();
+		if(!variableTable.contains(varName)) {
+			this.error = "Variable does not exist; At: ";
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		}
+
+		if (ctx.exception != null) {
+			this.error = "No valid variable to lock or unlock; At: ";
+			this.errorOffset = ctx.getStart().getStartIndex();
+			this.errorEnd = ctx.getStop().getStopIndex();
+		}
 	}
 
+	//TODO: check and change
 	@Override
 	public void exitFuncallLine(GrammarParser.FuncallLineContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
 		//get the (return)type of the function and put it in the parseTree
 		ArrayList<Integer> type = this.parseTreeProperty.get(ctx.getChild(0));
 		this.parseTreeProperty.put(ctx, type);
@@ -226,6 +352,11 @@ public class TypeChecker extends GrammarBaseListener {
 
 	@Override
 	public void exitParensExpr(GrammarParser.ParensExprContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
 		//take the type between the ( ) and put it in the ParseTree
 		ArrayList<Integer> type = this.parseTreeProperty.get(ctx.getChild(1));
 		this.parseTreeProperty.put(ctx, type);
@@ -239,6 +370,11 @@ public class TypeChecker extends GrammarBaseListener {
 
 	@Override
 	public void exitCompExpr(GrammarParser.CompExprContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
 		//check if the left and right hand side of the comparison have the same type
 		ArrayList left = this.parseTreeProperty.get(ctx.getChild(0));
 		ArrayList right = this.parseTreeProperty.get(ctx.getChild(2));
@@ -271,6 +407,11 @@ public class TypeChecker extends GrammarBaseListener {
 
 	@Override
 	public void exitMultExpr(GrammarParser.MultExprContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
 		ArrayList left = this.parseTreeProperty.get(ctx.getChild(0));
 		ArrayList right = this.parseTreeProperty.get(ctx.getChild(2));
 		if (!left.get(0).equals(0) || !right.get(0).equals(0)) {
@@ -293,6 +434,11 @@ public class TypeChecker extends GrammarBaseListener {
 
 	@Override
 	public void exitAddorsubExpr(GrammarParser.AddorsubExprContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
 		ArrayList left = this.parseTreeProperty.get(ctx.getChild(0));
 		ArrayList right = this.parseTreeProperty.get(ctx.getChild(2));
 		ArrayList<Integer> type = new ArrayList<>();
@@ -334,6 +480,11 @@ public class TypeChecker extends GrammarBaseListener {
 
 	@Override
 	public void exitConstExpr(GrammarParser.ConstExprContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
 		//no types to check, but do put the right type in the parseTree
 		ArrayList<Integer> type = new ArrayList<>();
 		if(ctx.NUM().getSymbol() != null) {
@@ -354,6 +505,11 @@ public class TypeChecker extends GrammarBaseListener {
 
 	@Override
 	public void exitArrExpr(GrammarParser.ArrExprContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
 		String varName = ctx.VARNAME().getSymbol().getText();
 		if(variableTable.contains(varName)) {
 			ArrayList<Integer> type = variableTable.getType(varName);
@@ -381,6 +537,11 @@ public class TypeChecker extends GrammarBaseListener {
 
 	@Override
 	public void exitVarExpr(GrammarParser.VarExprContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+
 		String varName = ctx.VARNAME().getSymbol().getText();
 		if(variableTable.contains(varName)) {
 			ArrayList<Integer> type = variableTable.getType(varName);
@@ -401,6 +562,10 @@ public class TypeChecker extends GrammarBaseListener {
 
 	@Override
 	public void exitListExpr(GrammarParser.ListExprContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
 		//check if the types at all indices are the same
 		ArrayList<Integer> first = this.parseTreeProperty.get(ctx.getChild(1));
 		int childCount = ctx.getChildCount();
@@ -433,9 +598,13 @@ public class TypeChecker extends GrammarBaseListener {
 	//	============================================================
 //	----------------------- Target below -----------------------
 //	============================================================
-	
+
 	@Override
 	public void exitVarTarget(GrammarParser.VarTargetContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
 		String varName = ctx.VARNAME().getSymbol().getText();
 		if(variableTable.contains(varName)) {
 			ArrayList<Integer> type = variableTable.getType(varName);
@@ -456,6 +625,10 @@ public class TypeChecker extends GrammarBaseListener {
 
 	@Override
 	public void exitArrayTarget(GrammarParser.ArrayTargetContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
 		String varName = ctx.VARNAME().getSymbol().getText();
 		if(variableTable.contains(varName)) {
 			ArrayList<Integer> type = variableTable.getType(varName);
@@ -482,11 +655,28 @@ public class TypeChecker extends GrammarBaseListener {
 	}
 
 //	============================================================
+//	-------------------- Functioncall below --------------------
+//	============================================================
+
+	//TODO: implement
+	@Override
+	public void exitFunctioncall(GrammarParser.FunctioncallContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
+	}
+
+// 	============================================================
 //	----------------------- Types below ------------------------
 //	============================================================
 
 	@Override
 	public void exitInt(GrammarParser.IntContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
 		//put the integer list belonging to Int (== [0]) in the parseTree
 		ArrayList<Integer> type = new ArrayList<>();
 		type.add(0);
@@ -502,6 +692,10 @@ public class TypeChecker extends GrammarBaseListener {
 
 	@Override
 	public void exitBool(GrammarParser.BoolContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
 		//put the integer list belonging to Bool (== [1]) in the parseTree
 		ArrayList<Integer> type = new ArrayList<>();
 		type.add(1);
@@ -517,6 +711,10 @@ public class TypeChecker extends GrammarBaseListener {
 
 	@Override
 	public void exitStr(GrammarParser.StrContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
 		//put the integer list belonging to String (== [3]) in the parseTree
 		ArrayList<Integer> type = new ArrayList<>();
 		type.add(3);
@@ -532,11 +730,26 @@ public class TypeChecker extends GrammarBaseListener {
 
 	@Override
 	public void exitArray(GrammarParser.ArrayContext ctx) {
+		//if a typeError already occurred, then just return
+		if(error != null) {
+			return;
+		}
 		//put the integer ArrayList belonging to String (== [3]) in the parseTree
 		ArrayList<Integer> type = new ArrayList<>();
 		type.add(4);
-		type.addAll(this.parseTreeProperty.get(ctx.getChild(1)));
+//		if(ctx.getChildCount() < 2) {
+//			this.error = "Arr has no type; At: ";
+//			this.errorOffset = ctx.getStart().getStartIndex();
+//			this.errorEnd = ctx.getStop().getStopIndex();
+//
+//			//TODO: fix null pointer because not putting type in parseTree
+//			type.add(0);
+//			this.parseTreeProperty.put(ctx, type);
+//		} else {
+		ArrayList<Integer> oldType = this.parseTreeProperty.get(ctx.getChild(1));
+		type.addAll(oldType);
 		this.parseTreeProperty.put(ctx, type);
+//		}
 
 		//if an exception happened, give an error message and location
 		if (ctx.exception != null) {

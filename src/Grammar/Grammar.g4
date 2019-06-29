@@ -4,9 +4,6 @@ program: (function | line)+ EOF;
 
 function: FUN (types)? FUNNAME (types VARNAME)* OCUR line+ (RETURN expr)? CCUR;
 
-
-functioncall: FUNNAME expr*;
-
 line
 	: IF expr OCUR line* CCUR
 		(ELIF expr OCUR line* CCUR)*
@@ -56,6 +53,8 @@ target
     | VARNAME OSQR expr CSQR 							#arrayTarget
     ;
 
+functioncall: FUNNAME expr*;
+
 types
 	: INT                                       		#int
 	| BOOL                                      		#bool
@@ -63,7 +62,6 @@ types
 	| STR                                       		#str
 	| ARRAY types                               		#array
     ;
-
 
 
 FUN: 'Fun';
