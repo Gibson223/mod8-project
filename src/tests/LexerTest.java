@@ -71,14 +71,16 @@ public class LexerTest {
         // init with assign
         correctline("for Int i = 5; i < a; i = i+1; {Arr Int a = [1,2,3];}");
         // initialization without assignment, so i = 0
-        correctline("for Int i; i < 10; i = i+1; {Int a = 5;}");
+        // this was the result of discussion/ default typechecker error
+        wrongline("for Int i; i < 10; i = i+1; {Int a = 5;}");
         // reassignment
-        correctline("for i = 5; i < 10; i = i+1; {Int a = 5;}");
+        wrongline("for i = 5; i < 10; i = i+1; {Int a = 5;}");
+        correctline("for Int i = 5; i < 10; i = i+1; {Int a = 5;}");
         // incorrect types
         wrongline("for Bool a; i < 10; i = i+1; {Int a = 5;}");
         wrongline("for Arr Bool a; i < 10; i = i+1; {Int a = 5;}");
         //empty for body
-        correctline("for Int a; i < 10; i = i+1; {}");
+        correctline("for Int a= 10; i < 10; i = i+1; {}");
     }
 
     @Test
