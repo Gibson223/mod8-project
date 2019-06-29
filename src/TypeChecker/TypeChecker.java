@@ -22,7 +22,7 @@ public class TypeChecker extends GrammarBaseListener {
 	private String error;
 	private int errorOffset;
 	private int errorEnd;
-	private SymbolTable variableTable = new SymbolTable();
+	private SymbolTable variableTable = new SymbolTable(true);
 
 //	Types are given in the form of an array.
 //	This array declares what the thing or type is in the first index.
@@ -568,6 +568,7 @@ public class TypeChecker extends GrammarBaseListener {
 		if(error != null) {
 			return;
 		}
+
 		//check if the types at all indices are the same
 		ArrayList<Integer> first = this.parseTreeProperty.get(ctx.getChild(1));
 		int childCount = ctx.getChildCount();
@@ -607,6 +608,7 @@ public class TypeChecker extends GrammarBaseListener {
 		if(error != null) {
 			return;
 		}
+
 		String varName = ctx.VARNAME().getSymbol().getText();
 		if(variableTable.contains(varName)) {
 			ArrayList<Integer> type = variableTable.getType(varName);
@@ -631,6 +633,7 @@ public class TypeChecker extends GrammarBaseListener {
 		if(error != null) {
 			return;
 		}
+
 		String varName = ctx.VARNAME().getSymbol().getText();
 		if(variableTable.contains(varName)) {
 			ArrayList<Integer> type = variableTable.getType(varName);
@@ -679,6 +682,7 @@ public class TypeChecker extends GrammarBaseListener {
 		if(error != null) {
 			return;
 		}
+
 		//put the integer list belonging to Int (== [0]) in the parseTree
 		ArrayList<Integer> type = new ArrayList<>();
 		type.add(0);
@@ -698,6 +702,7 @@ public class TypeChecker extends GrammarBaseListener {
 		if(error != null) {
 			return;
 		}
+
 		//put the integer list belonging to Bool (== [1]) in the parseTree
 		ArrayList<Integer> type = new ArrayList<>();
 		type.add(1);
@@ -717,6 +722,7 @@ public class TypeChecker extends GrammarBaseListener {
 		if(error != null) {
 			return;
 		}
+
 		//put the integer list belonging to String (== [3]) in the parseTree
 		ArrayList<Integer> type = new ArrayList<>();
 		type.add(3);
@@ -736,18 +742,10 @@ public class TypeChecker extends GrammarBaseListener {
 		if(error != null) {
 			return;
 		}
+
 		//put the integer ArrayList belonging to String (== [3]) in the parseTree
 		ArrayList<Integer> type = new ArrayList<>();
 		type.add(4);
-//		if(ctx.getChildCount() < 2) {
-//			this.error = "Arr has no type; At: ";
-//			this.errorOffset = ctx.getStart().getStartIndex();
-//			this.errorEnd = ctx.getStop().getStopIndex();
-//
-//			//TODO: fix null pointer because not putting type in parseTree
-//			type.add(0);
-//			this.parseTreeProperty.put(ctx, type);
-//		} else {
 		ArrayList<Integer> oldType = this.parseTreeProperty.get(ctx.getChild(1));
 		type.addAll(oldType);
 		this.parseTreeProperty.put(ctx, type);
