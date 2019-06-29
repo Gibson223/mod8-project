@@ -4,23 +4,10 @@ program: (function | line)+ EOF;
 
 function: FUN (types)? FUNNAME (types VARNAME)* OCUR line+ (RETURN expr)? CCUR;
 
-
-functioncall: FUNNAME expr*
-//    | 'InNumber'
-//    | 'InChar'
-//    | 'OutNumber' expr
-//    | 'OutChar' expr;
-        ;
-
 line
 	: IF expr OCUR line* CCUR
 		(ELIF expr OCUR line* CCUR)*
 		(ELSE OCUR line* CCUR)?							#ifLine
-//	| FOR INT? VARNAME
-//		(ASGN expr)? SCOL
-//		expr SCOL
-//		VARNAME ASGN expr SCOL
-//		OCUR line* CCUR									#forLine
 	| FOR (VARNAME | INT VARNAME ASGN expr) SCOL
 		expr SCOL
 		VARNAME ASGN expr SCOL
@@ -61,6 +48,8 @@ target
     | VARNAME OSQR expr CSQR 							#arrayTarget
     ;
 
+functioncall: FUNNAME expr*;
+
 types
 	: INT                                       		#int
 	| BOOL                                      		#bool
@@ -68,7 +57,6 @@ types
 	| STR                                       		#str
 	| ARRAY types                               		#array
     ;
-
 
 
 FUN: 'Fun';

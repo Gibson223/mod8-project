@@ -2,17 +2,17 @@ package TypeChecker;
 
 import java.util.*;
 
-public class symtable{
-    public innertable root;
-    public innertable currentscope;
+public class SymbolTable {
+    public InnerTable root;
+    public InnerTable currentscope;
 
-    public symtable() {
-//        this.root = new innertable();
+    public SymbolTable() {
+//        this.root = new InnerTable();
 //        this.currentscope = root;
     }
-    public symtable(boolean str) {
+    public SymbolTable(boolean str) {
         if (str) {
-            this.root = new innertable();
+            this.root = new InnerTable();
         }else {
             this.root = null;
         }
@@ -21,10 +21,10 @@ public class symtable{
 
     public void openScope() {
         if (this.root == null) {
-            this.root = new innertable();
+            this.root = new InnerTable();
             this.currentscope = root;
         } else {
-            innertable child = new innertable(currentscope);
+            InnerTable child = new InnerTable(currentscope);
             this.currentscope = child;
         }
     }
@@ -36,8 +36,8 @@ public class symtable{
         this.currentscope = this.currentscope.parent;
     }
 
-    public List<int> gettype(String id) {
-        innertable curr = currentscope;
+    public ArrayList<Integer> getType(String id) {
+        InnerTable curr = currentscope;
         while (curr != root) {
             if (curr.contains(id)) {
                 return curr.list.get(id);
@@ -47,15 +47,15 @@ public class symtable{
         if (this.root.contains(id)) {
             return this.root.list.get(id);
         }
-        return SHOULD BE REPLACED BY THE ERROR TYPE; // TODO should be replaced by valid error type or if
+        return null; // TODO should be replaced by valid error type or if
     }
 
-    public boolean add(String id, List<int> type) {
+    public boolean add(String id, ArrayList<Integer> type) {
         return this.currentscope.add(id, type);
     }
 
     public boolean contains(String id) {
-        innertable curr = currentscope;
+        InnerTable curr = currentscope;
         while (curr != root) {
             if (curr.contains(id)) {
                 return true;
@@ -69,16 +69,16 @@ public class symtable{
         return this.currentscope.contains(id);
     }
 
-    class innertable{
-        public HashMap<String, List<int>> list = new HashMap<>();
-        public innertable parent;
-        public innertable(innertable parent) {
+    class InnerTable{
+        public HashMap<String, ArrayList<Integer>> list = new HashMap<>();
+        public InnerTable parent;
+        public InnerTable(InnerTable parent) {
             this.parent = parent;
         }
-        public innertable(){
+        public InnerTable(){
             this.parent = null;
         }
-        public boolean add(String id, List<int> type) {
+        public boolean add(String id, ArrayList<Integer> type) {
             if (this.list.containsKey(id)) {
                 return false;
             }
