@@ -5,7 +5,12 @@ program: (function | line)+ EOF;
 function: FUN (types)? FUNNAME (types VARNAME)* OCUR line+ (RETURN expr)? CCUR;
 
 
-functioncall: FUNNAME expr*;
+functioncall: FUNNAME expr*
+//    | 'InNumber'
+//    | 'InChar'
+//    | 'OutNumber' expr
+//    | 'OutChar' expr;
+        ;
 
 line
 	: IF expr OCUR line* CCUR
@@ -107,8 +112,8 @@ ELIF:	'elif';
 ELSE:	'else';
 WHILE:	'while';
 FOR:	'for';
-TRUE:	'false';
-FALSE:	'true';
+TRUE:	'true';
+FALSE:	'false';
 
 
 fragment LOWERCASE: [a-z];
