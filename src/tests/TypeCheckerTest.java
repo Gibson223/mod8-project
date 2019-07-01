@@ -121,6 +121,16 @@ public class TypeCheckerTest {
 		line("lock ;", false);
 		line("unlock ;", false);
 
+		line("Bool b = 3<3;", true);
+		line("Bool b = 3<=3;", true);
+		line("Bool b = 3>3;", true);
+		line("Bool b = 3>=3;", true);
+		line("Bool b = 3==3;", true);
+		line("Bool b = 3!=3;", true);
+		line("Bool b = 3=3;", false);
+		line("Bool b = 3=>3;", false);
+		line("Bool b = 3=<3;", false);
+
 //		function calls not supported for now
 	}
 
