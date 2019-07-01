@@ -8,7 +8,7 @@ line
 	: IF expr OCUR line* CCUR
 		(ELIF expr OCUR line* CCUR)*
 		(ELSE OCUR line* CCUR)?							#ifLine
-	//for is not fully supported at this moment
+	//for is not supported at this moment
 	| FOR (VARNAME | INT VARNAME ASGN expr) SCOL
 		expr SCOL
 		VARNAME ASGN expr SCOL
@@ -16,10 +16,13 @@ line
 	| WHILE expr OCUR line* CCUR						#whileLine
 	| PARALLEL OCUR line* CCUR                  		#parallelLine
     | SEQUENTIAL OCUR line* CCUR                		#sequentialLine
+    //function calls not supported yet
     | types VARNAME
         (ASGN expr | ASGN functioncall)? SCOL	        #declLine
+    //function calls not supported yet
     | target ASGN (expr | functioncall) SCOL      		#asgnLine
     | (LOCK | UNLOCK) VARNAME SCOL              		#lockLine
+    //function calls not supported yet
     | functioncall SCOL                             	#funcallLine
     ;
 
