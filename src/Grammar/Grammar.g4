@@ -47,6 +47,7 @@ comp
 
 target
     : VARNAME              								#varTarget
+    //arrays are not fully supported at this moment
     | VARNAME OSQR expr CSQR 							#arrayTarget
     ;
 
