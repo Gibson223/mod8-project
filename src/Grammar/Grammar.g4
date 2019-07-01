@@ -117,6 +117,8 @@ fragment COMP: EQ | NEQ | LT | LET | GT | GET;
 FUNNAME: UPPERCASE (LETTER | DIGIT)*;
 VARNAME: LOWERCASE (LETTER | DIGIT)*;
 NUM: DIGIT+;
+
+//no whitespace allowed in strings!
 STRING: '"' [\u0000\u0021\u0023-\uFFFE]* '"';
 // CHARACTER: '\'' . '\'';
 
