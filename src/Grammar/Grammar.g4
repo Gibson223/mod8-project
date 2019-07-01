@@ -1,6 +1,6 @@
 grammar Grammar;
 
-program: (function | line)+ EOF;
+program: (function|line)+ EOF;
 
 function: FUN (types)? FUNNAME (types VARNAME)* OCUR line+ (RETURN expr)? CCUR;
 
@@ -8,6 +8,7 @@ line
 	: IF expr OCUR line* CCUR
 		(ELIF expr OCUR line* CCUR)*
 		(ELSE OCUR line* CCUR)?							#ifLine
+	//for is not fully supported at this moment
 	| FOR (VARNAME | INT VARNAME ASGN expr) SCOL
 		expr SCOL
 		VARNAME ASGN expr SCOL
@@ -31,6 +32,7 @@ expr
 	| (NUM | TRUE | FALSE | STRING)						#constExpr
 	| VARNAME OSQR expr CSQR							#arrExpr
 	| VARNAME											#varExpr
+	//arays are not fully supported at this moment
 	| OSQR expr (COM expr)* CSQR             		    #listExpr
 	; 
 
@@ -55,6 +57,7 @@ types
 	| BOOL                                      		#bool
 	//| CHAR                                      		#char
 	| STR                                       		#str
+	//arrays are not fully supported at this moment
 	| ARRAY types                               		#array
     ;
 

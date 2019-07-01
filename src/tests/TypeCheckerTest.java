@@ -22,7 +22,7 @@ public class TypeCheckerTest {
 		program("Bool t = true; while t {t = false;}", true);
 
 		program("Bool t = true; while t {lock t; t = false; unlock t;}", true);
-//
+
 		program("Int i = 0; Int i2 = i;", true);
 		program("Bool b = true; Bool b2 = b;", true);
 		program("Str s = \"str\"; Str s2 = s;", true);
