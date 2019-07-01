@@ -9,8 +9,6 @@ import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import javax.swing.*;
-import javax.xml.stream.events.Comment;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -75,10 +73,15 @@ public class SPRILGenerator extends GrammarBaseVisitor {
         String pop(int r) {return "Pop "+ r;}
     }
 
+    // known heap location
     public String store(int reg) {
         return "Store " + reg + " (DirAddr "+ this.heaptop++ + ")"; // heaptop++ increments after so if 100, then store ... 100 and
     }
 
+    // unkown heap location
+    public String store(int reg, int heaplocation) {
+        return "Store " + reg + " (DirAddr "+ heaplocation+ ")"; // heaptop++ increments after so if 100, then store ... 100 and
+    }
 
     private int getemptyreg() {
         for (int i = 0; i < 6; i++) {
@@ -109,7 +112,7 @@ public class SPRILGenerator extends GrammarBaseVisitor {
         for (RuleContext fun: ctx.function() ) {
             visit(fun);
         }
-        System.out.println(this.validFunctions.entrySet());
+        System.out.println("valid function: "+this.validFunctions.entrySet());
         System.out.println("in program");
         this.firstTime = false;
         for (RuleContext line : ctx.line()) {
@@ -222,6 +225,10 @@ public class SPRILGenerator extends GrammarBaseVisitor {
             // in case of type declaration
             System.out.println("should be last print");
             symtable.currentscope.addType(varname, types);
+
+            // todo: check if this is appropriate solution for nullpointer
+            // todo: for (valid) program: Int b; Int c; if true {Int b = 10;} else {Int c = 20;}OutNumber b;
+            symtable.currentscope.addLoc(varname, heaptop++);
         }
         return null;
     }
@@ -234,11 +241,13 @@ public class SPRILGenerator extends GrammarBaseVisitor {
             int expr = (int) visit(ctx.expr());
             int heaploc =symtable.getHeapLoc(varname);
             List<Integer> types = symtable.getType(varname);
-            instr("Store "+ expr + " DirAddr "+ heaploc);
+            instr(store(expr, heaploc));
             clearreg(expr);
             commment("asgnline: "+ "varname: "+ varname + " overwritten at heaploc "+ heaploc +" types: "+ types + " expr: "+ ctx.expr().getText());
         } else {
-            // when functioncall
+            int funcallregister = ((int) visit(ctx.functioncall()));
+            store(funcallregister, symtable.getHeapLoc(varname));
+            clearreg(funcallregister);
         }
         return null;
     }
@@ -257,28 +266,29 @@ public class SPRILGenerator extends GrammarBaseVisitor {
                 expr = (int) visit(ctx.expr(i));
                 not(expr);
                 instr("Nop");
+                commment("jump over if body");
             }
             int nop_index = this.currLine - 1;
+            if (expr != rnone) {
+                clearreg(expr);
+            } else {
+
+            }
             for (int j = opencur+1; j < closecur; j++) {
                 visit(ctx.getChild(j));
             }
             symtable.closeScope();
             this.heaptop = heap_backup;
             if (! ctx.getChild(opencur-1).getText().equals("else")) {
-                if (expr == rnone) {
-                    System.out.println("should not have rnone as expr");
-                }
-                program.set(nop_index, "{-" + nop_index + "-}\t\t" + "Branch " + expr + " (Abs " + (currLine+1) + ")\t{- if/elif -}");
-                clearreg(expr);
+                program.set(nop_index, "{-" + nop_index + "-}\t\t" + "Branch " + expr + " (Rel " + (currLine+1 - nop_index) + ")\t{- no if/elif conditional jump-}");
                 instr("Nop"); // otherwise jump can be after last instruction
                 nopsendblock.add(currLine-1);
             }
         }
         instr("Nop");
         for (int nop_instr : nopsendblock) {
-            this.program.set(nop_instr, "{-"+ nop_instr + "-}\t\tJump (Abs " + (currLine-1) + ")" + "\t\t\t{- Jump to after if, elif and else statements -}");
+            this.program.set(nop_instr, "{-"+ nop_instr + "-}\t\tJump (Rel " + (currLine-1- nop_instr) + ")" + "\t\t\t{- Jump to after if, elif and else statements -}");
         }
-        System.out.println(currLine-1);
         return null;
     }
 
@@ -286,19 +296,25 @@ public class SPRILGenerator extends GrammarBaseVisitor {
     public Object visitWhileLine(GrammarParser.WhileLineContext ctx) {
         int heap_backup = this.heaptop;
         symtable.openScope();
-        int expr = rnone;
-        expr = (int) visit(ctx.expr());
+        int startwhile = currLine;
+        int expr = (int) visit(ctx.expr());
         not(expr);
         instr("Nop");
+        commment("jump over while body");
         int nop_index = this.currLine - 1;
-        for (ParseTree line: ctx.line()) {
+        clearreg(expr);
+        for (ParseTree line : ctx.line()) {
             visit(line);
         }
         symtable.closeScope();
         this.heaptop = heap_backup;
-        program.set(nop_index, "{-" + nop_index + "-}\t\t" + "Branch " + expr + "(Abs " + (currLine) + ")");
-        clearreg(expr);
-        instr("Nop"); // otherwise jump can be after last instruction
+        System.out.println("startwhile: "+ startwhile);
+        System.out.println("currline: "+ currLine);
+        instr("Jump (Rel (" + (startwhile-currLine) + ") )");
+        commment("jump back to start of while loop");
+        instr("Nop");
+        commment("after while");
+        program.set(nop_index, "{-" + nop_index + "-}\t\t" + "Branch " + expr + " (Rel " + (currLine-1-nop_index) + ")\t{- start while loop -}");
         return null;
     }
 
@@ -476,11 +492,11 @@ public class SPRILGenerator extends GrammarBaseVisitor {
 //        convertProgToFile("Int a = 1 + 2 - 2 * 3;", ""); // to check calculations
 //        convertProgToFile("Int a = 5; a = 10+ a;",""); // to check asgnline and varExpr
 
-//        convertProgToFile("if true {Int b = 10;}","");
 //        convertProgToFile("if 5 {Bool a = true;Int b= 5;} elif 2 {Bool trueurue = true;} else {Int f = 10;}", ""); // to check ifline
 //        convertProgToFile("Bool a = false;if a {OutNumber a;} else {OutNumber 2;}","");
-        System.out.println(convertProgToFile("Int a = 0; Int b = 5; if a == 0 "+
-                "{if b == 4 {OutNumber 10;} else {OutNumber 1;}} elif a == 1 {OutNumber 1;} else {OutNumber 2;}", ""));
+
+//        System.out.println(convertProgToFile("Int a = 0; Int b = 5; if a == 0 "+
+//                "{if b == 4 {OutNumber 10;} else {OutNumber 1;}} elif a == 1 {OutNumber 1;} else {OutNumber 2;}", ""));
     }
 
     public static String convertProgToFile(String program, String location) {

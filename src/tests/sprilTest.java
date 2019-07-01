@@ -72,8 +72,19 @@ public class sprilTest {
         try {
             List<String> res= runprog(program);
             System.out.println("-------------------");
-            for (int i = res.size() - expected_outputs.size(); i < expected_outputs.size(); i++) {
-                assertEquals(expected_outputs.get(i), res.get(i));
+            System.out.println("res: "+ res);
+            System.out.println(res.size() + "------" + expected_outputs.size());
+            for (int i = res.size() - expected_outputs.size(); i < res.size(); i++) {
+                int adjusted_index_expected = i-res.size()+expected_outputs.size();
+                System.out.println("I: "+ i+ "  adjustedindex: "+ adjusted_index_expected);
+                System.out.println("expected: "+ expected_outputs.get(adjusted_index_expected));
+                System.out.println("actual: "+ res.get(i));
+                assertEquals(expected_outputs.get(adjusted_index_expected), res.get(i));
+            }
+            if (res.get(res.size()-expected_outputs.size()-1).startsWith("Sprockell")) {
+                fail();
+            } else {
+                System.out.println("last line not output sprockell---------");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -87,11 +98,30 @@ public class sprilTest {
     }
 
     @Test
-    public void simpleTest() {
+    public void ifTest() {
         assertProg("Bool a = true; if a {OutNumber 2;} else {OutNumber 10;}",
                 Arrays.asList(sprolprint(0, 2)));
         assertProg("Int a = true; if a {OutNumber 5;} else {OutNumber 10;}",
                 Arrays.asList(sprolprint(0, 5)));
+        assertProg("Int a = false; if a {OutNumber 5;} else {OutNumber 10;}",
+                Arrays.asList(sprolprint(0, 10)));
+        assertProg("Int b; Int c; if true {b = 10;} else {c = 20;}OutNumber b;",
+                Arrays.asList(sprolprint(0, 10)));
+
+    }
+
+    @Test
+    public void whileTest() {
+        assertProg("Int a = 5;Int b = 8; while a == 5 {" +
+                        "if b < 10 {b = b+ 1;} else {a = 6;}} OutNumber a;"
+                , Arrays.asList(sprolprint(0, 6))
+                );
+        assertProg("Bool a = false; while a {OutNumber 10;} OutNumber 5;"
+                , Arrays.asList(sprolprint(0, 5)));
+        assertProg("Bool a = true; while a {OutNumber 10;a = false;} OutNumber 5;"
+                , Arrays.asList(sprolprint(0, 10), sprolprint(0, 5)));
+        assertProg("Bool a = true; while a {OutNumber 10;a = false;} OutNumber 5;"
+                , Arrays.asList(sprolprint(0, 10)));
     }
 
 }
