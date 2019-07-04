@@ -4,6 +4,7 @@ program: (function | line)+ EOF;
 
 function: FUN (types)? FUNNAME (types VARNAME)* OCUR line+ (RETURN expr)? CCUR;
 
+sequential: SEQUENTIAL OCUR line* CCUR;
 line
 	: IF expr OCUR line* CCUR
 		(ELIF expr OCUR line* CCUR)*
@@ -13,8 +14,7 @@ line
 		VARNAME ASGN expr SCOL
 		OCUR line* CCUR									#forLine
 	| WHILE expr OCUR line* CCUR						#whileLine
-	| PARALLEL OCUR line* CCUR                  		#parallelLine
-    | SEQUENTIAL OCUR line* CCUR                		#sequentialLine
+	| PARALLEL OCUR sequential+ CCUR                  	#parallelLine
     | types VARNAME
         (ASGN expr | ASGN functioncall)? SCOL	        #declLine
     | target ASGN (expr | functioncall) SCOL      		#asgnLine

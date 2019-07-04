@@ -25,3 +25,4 @@ prog = [
        ]
 
 main = runWithDebugger (debuggerSimplePrintAndWait myShow) [prog,prog,prog,prog]
+main2 = run [prog,prog,prog,prog]
