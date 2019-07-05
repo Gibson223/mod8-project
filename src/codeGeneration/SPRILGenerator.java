@@ -16,79 +16,56 @@ import java.util.HashMap;
 import java.util.List;
 
 import static codeGeneration.SPRILGenerator.types.*;
-import static codeGeneration.SPRILGenerator.registers.*;
-
-
-//Fun Int Mult2 Int a Int v {a = a*2 ;return a}
-//        Fun Int Stupid Int f {Int t = f + f; return t+t}
-//        Int a = Mult2 5 4;
+import static codeGeneration.SPRILGenerator.registersAndmemory.*;
 
 public class SPRILGenerator extends GrammarBaseVisitor {
+    private List<List<String>> programs;
     private List<String> program;
-    private boolean errors;
     private int currLine;
     private int heaptop;
     private symtable symtable;
-    // string: varname, type: [types(static vals)], value: register value 2-7 for a-f and 0 if not assigned
     private boolean[] registers; // true: register in use, false: register NOT in use
     private HashMap<String, RuleContext> validFunctions;
+    private boolean firstTime; // visit functions to save names then
+    private int sprockellAndprogID;
 
+    public static final int REGISTER_COUNT = 6;
     public SPRILGenerator() {
         this.program = new ArrayList<>();
-        this.errors = false;
         this.currLine = 0;
         this.heaptop = 0;
         this.validFunctions = new HashMap();
         this.firstTime = true;
-        this.registers = new boolean[6];
+        this.registers = new boolean[REGISTER_COUNT];
+        this.sprockellAndprogID = 0;
+        this.programs = new ArrayList<>();
+        this.programs.add(program);
+
     }
 
-    public static class types{ // TODO capitalize all finals
-    //	0 = Int
-    //	1 = Boolean
-    //	2 = Char (currently unused)
-    //	3 = String
-    //	4 = Array
-        //	The types belonging to each int are as follows:
-        public static final int INT = 0;
-        public static final int BOOLEAN = 1;
-        public static final int STRING = 3;
-        public static final int ARRAY = 4;
+    private void not(int register) {
+        int truereg = getemptyreg();
+        instr("Load (ImmValue " + "1)" + " " + truereg);
+        instr("Compute Xor "+ truereg + " " + register + " " + register);
+        clearreg(truereg);
     }
 
-    public static class registers { // TODO capitalize all finals
-        // register values for instruction usage
-        // same values as defined in the sprockell BasicFunctions.hs file
-        public static final int ra = 2; // registers 0
-        public static final int rb = 3; // registers 1
-        public static final int rc = 4; // registers 2
-        public static final int rd = 5; // registers 3
-        public static final int re = 6; // registers 4
-        public static final int rf = 7; // registers 5
-        public static final int rnone = 0;
-    }
 
-    public static class op {
-        String push(int r) {return "Push "+ r;}
-        String pop(int r) {return "Pop "+ r;}
-    }
-
-    // known heap location
+    // unknown heap location
     public String store(int reg) {
+        this.heaptop = heaptop +1; // spot for lock on int after it
         return "Store " + reg + " (DirAddr "+ this.heaptop++ + ")"; // heaptop++ increments after so if 100, then store ... 100 and
     }
 
-    // unkown heap location
+    // known heap location
     public String store(int reg, int heaplocation) {
-        return "Store " + reg + " (DirAddr "+ heaplocation+ ")"; // heaptop++ increments after so if 100, then store ... 100 and
+        return "Store " + reg + " (DirAddr "+ heaplocation+ ")";
     }
 
     private int getemptyreg() {
         for (int i = 0; i < 6; i++) {
             if (!registers[i]) { // so register is empty
-                System.out.println("register was: "+ registers[i]);
                 registers[i] = true;
-                System.out.println("returned register "+ (i+2));
                 return (i +2);
             }
         }
@@ -101,11 +78,9 @@ public class SPRILGenerator extends GrammarBaseVisitor {
         if (!registers[actualreg]) { // when register is already clear/false
             System.out.println("tried to clear register that was already cleared");
         }
-        System.out.println("cleared register(-2): "+ actualreg);
         this.registers[actualreg] = false;
     }
-
-    private boolean firstTime;
+// ------------------------utility above------------------------
     @Override
     public Object visitProgram(GrammarParser.ProgramContext ctx) {
         this.symtable = new symtable(true);
@@ -115,16 +90,314 @@ public class SPRILGenerator extends GrammarBaseVisitor {
         System.out.println("valid function: "+this.validFunctions.entrySet());
         System.out.println("in program");
         this.firstTime = false;
+
         for (RuleContext line : ctx.line()) {
             visit(line);
         }
-//        for (RuleContext fun: ctx.function() ) {
-//            visit(fun);
-//        }
+        // to finish remaining threads
+        program = programs.get(0); // main thread
+        instr("\n\t\t\tNop");
+        commment("start of terminateAllNotStartedPrograms");
+        terminateAllNotStartedPrograms();
         System.out.println("registers: "+ java.util.Arrays.toString(this.registers));
         return null;
     }
 
+//  ----------------------------concurrency stuff belov -------------------------------------------------
+    public int readFromShared (int addr) { // 2 instructions
+        int emptyreg = getemptyreg();
+        instr(String.format("\n\n\t\t\tReadInstr (DirAddr %s)", addr));
+        commment("start readFromShared");
+        instr("Receive "+ emptyreg);
+        return emptyreg;
+    }
+
+    public int writeImmToShared(int value, int addr) { // 2 instructions
+        int emptyreg = getemptyreg();
+        instr(String.format("\n\n\t\t\tLoad (ImmValue (%s)) " + emptyreg, value));
+        commment("start writeImmToShared");
+        instr(String.format("WriteInstr %s (DirAddr %s)", emptyreg, addr));
+        return emptyreg;
+    }
+
+    public void writeRegisterToShared(int register, int addr) { // 2 instructions
+        instr(String.format("WriteInstr %s (DirAddr %s)", register, addr));
+        commment("end writeREgisterToShared");
+        }
+
+    public void looplock (int address) {
+        instr(String.format("\n\n\t\t\tTestAndSet (DirAddr %s)",address));
+        commment("start of looplock");
+        int obtainedlock = getemptyreg();
+        instr("Receive "+ obtainedlock);
+        instr("Branch "+ obtainedlock + " (Rel 2)");
+        instr("Jump (Rel (-3))\n");
+        commment("end looplock");
+        clearreg(obtainedlock);
+    }
+
+    // returns addr where the jump has to be placed to the part when lock not obtained
+    public int trylock (int address) {
+        instr(String.format("\n\n\t\t\tTestAndSet (DirAddr %s)",address));
+        commment("start of trylock");
+        int obtainedlock = getemptyreg();
+        instr("Receive "+ obtainedlock);
+        instr("Branch "+ obtainedlock + " (Rel 2)");
+        instr("Jump should be changed, from trylock");
+        commment("end trylock");
+        clearreg(obtainedlock);
+        return currLine -1;
+    }
+
+    // returns where the jump should be placed for when there is no match
+    private int checkMatchSprockellID(int shmlocation){
+        int read_sprockelID = readFromShared(shmlocation);
+        instr("Compute Equal "+ read_sprockelID + " " + regSprockelID + " " + read_sprockelID);
+        instr(String.format("Branch %s (Rel 2)", read_sprockelID));
+        commment("read sprockell id equals expected sprockellid, so continue after jump");
+        clearreg(read_sprockelID);
+        instr("Nop");
+        return currLine -1;
+    }
+
+    public void push (int register) {
+        instr("Push " + register);
+    }
+
+    public int pop() {
+        int emptyreg = getemptyreg();
+        instr("Pop " + emptyreg);
+        return emptyreg;
+    }
+
+
+    private void activateSprockel(int dedicatedregister){
+        int emptyreg = getemptyreg();
+        commment("\n\n\t\t\tstart of activateSprockell");
+        instr("Load (ImmValue 1) "+ emptyreg);
+        instr(String.format("WriteInstr %s (DirAddr %s)", emptyreg,terminatedOrStart) );
+        clearreg(emptyreg);
+        int poppedsprillid = pop();
+
+
+
+        instr("WriteInstr "+ poppedsprillid + " numberIO");
+        commment("which sprockell should now be activated");
+
+
+
+
+        instr(String.format("WriteInstr %s (DirAddr %s)", poppedsprillid, ProgID));
+        // poll to check value changed
+
+        // clearreg(checkPollChanged(poppedsprillid, ProgID)); was on
+        clearreg(poppedsprillid);
+
+        instr(String.format("Compute Decr %s %s %s", dedicatedregister, dedicatedregister, dedicatedregister));
+        commment("decremented dedicated register for amount of to be activated threads");
+        commment("\n\n\t\t\tend of activateSprockell");
+    }
+
+    private int checkPollChanged(int written_reg, int globalmemlocation){
+        commment("\n\n\t\t\tstart of polling changed value");
+        int obtained_value = readFromShared(globalmemlocation);
+        instr(String.format("Compute Equal %s %s %s", written_reg, obtained_value, obtained_value));
+        instr(String.format("Branch %s (Rel (%s))", obtained_value, -3)); // 3 since readfromshared is 2 instr +1 from compute
+        commment("obtained value same as written so poll again");
+        clearreg(obtained_value);
+        obtained_value = readFromShared(globalmemlocation);
+        commment("pulled fresh since reg used in compute above");
+        clearreg(written_reg);
+        return obtained_value;
+    }
+
+
+    public void terminateAllNotStartedPrograms() { // called by main to terminate uncalled sprockells
+        writeImmToShared(1, terminateLoopingStartSprockells);
+    }
+
+    public static class registersAndmemory {
+        public static final int req_Lock = 0; // 0 or 1
+        public static final int req_Type = 1; // shown below
+        public static final int req_SprillID = 2;
+        public static final int heaplocOrValue = 3; // when writeback it is a value
+        public static final int terminateLoopingStartSprockells = 4;
+        public static final int startProgLock = 5;
+        public static final int ProgID = 6; // same as sprill id
+        public static final int terminatedOrStart = 7; // set to 1 if prog to start
+
+        // vaules for shm address 1
+        public static final int setting_up= 0;
+        public static final int purerequest = 1;
+        public static final int requestAndlock = 2;
+        public static final int unlockAndwriteBack = 3;
+
+        public static final int rnone = -1; // no register to return
+        public static final int reg0 = 0;
+        public static final int regSprockelID = 1; // actual int used for sprockelID
+        public static final int rega = 2; // actual int used for regA
+        public static final int regb = 3; // actual int used for regA
+    }
+
+//  ----------------------------concurrency utility stuff -------------------------------------------------
+    private int currParallelThread;
+    @Override
+    public Object visitParallelLine(GrammarParser.ParallelLineContext ctx) {
+        boolean[] register_backup = this.registers;
+        int heap_backup = this.heaptop;
+        this.currParallelThread = this.sprockellAndprogID;
+        int currline_backup = this.currLine;
+        List<Integer> sequentialChildThreads = new ArrayList<>();
+        for (RuleContext newProg: ctx.sequential()) {
+            sequentialChildThreads.add((int) visit(newProg));
+        }
+        this.currLine = currline_backup;
+        int spr_backup = this.currParallelThread;
+        this.program = this.programs.get(spr_backup);
+        this.heaptop = heap_backup;
+        this.registers = register_backup;
+
+        // loading amount of to be activated programs
+        int amountstillonstacktobeactivated = getemptyreg();
+        int tobeterminatedprograms = getemptyreg(); // starts at amount threads and goes to 0 as well
+        instr("\n\n\t\tLoad (ImmValue "+ ctx.sequential().size() + ") "+ amountstillonstacktobeactivated); // to decrement if a child thread is activated
+        commment("loaded amount of childs to be spawned into dedicated register\n\n\t\tstart of managing child threads");
+        instr("\n\n\t\tLoad (ImmValue "+ ctx.sequential().size() + ") "+ tobeterminatedprograms); // to decrement if a child thread terminated
+        commment("amount of threads still needed to be terminated for parallel-handler to terminate");
+        int loadregister = getemptyreg();
+        for (int i=0; i < sequentialChildThreads.size(); i++) {
+            instr(String.format("Load (ImmValue %s) %s", sequentialChildThreads.get(i), loadregister));
+            push(loadregister);
+        }
+        this.currParallelThread = spr_backup;
+        clearreg(loadregister);
+        //obtain write lock to activate first seq block, is always present according to grammar
+//        looplock(startProgLock);
+//        activateSprockel(amountstillonstacktobeactivated);
+
+        // startloop
+        int startloop = currLine;
+        int failedtrylock = trylock(startProgLock);
+        // when it did lock, first check if all already started- if all already started then dedicatedregcount is 0
+        instr("Branch "+amountstillonstacktobeactivated+" (Rel (4))");// todo actually update: 2 (writeimmshare)+ over nop/jump
+        clearreg(writeImmToShared(0, 5));commment("to release proglock");
+        instr("nop all threads started jump to after activatesprockell"); // todo figure out end of checrequest
+        int startedallProgs = currLine-1;
+        activateSprockel(amountstillonstacktobeactivated); // resets occur in sequential
+        // end of activating threads
+        program.set(failedtrylock, "{-" + failedtrylock + "-}\t\t" + "Jump " + " (Rel " + (currLine - failedtrylock) + ")\t{- jump when trylock failed, going to check for terminated child threads-}");
+        program.set(startedallProgs, "{-" + startedallProgs + "-}\t\t" + "Jump " + " (Rel " + (currLine - startedallProgs) + ")\t{- did obtain trylock but no more threads to activate-}");
+        // start checking terminated thread
+        int noTerminatedChild_jumpToVarRequest = checkMatchSprockellID(ProgID);
+        // child thread terminated
+
+
+
+
+
+        instr("WriteInstr "+ tobeterminatedprograms+ " numberIO");
+        commment("can be deleted after testing");
+        instr(String.format("Compute Decr %s %s %s", tobeterminatedprograms, tobeterminatedprograms, tobeterminatedprograms));commment("decremented amount of child threads needed to be terminated still");
+
+
+
+
+
+        instr("Branch "+ tobeterminatedprograms + "(Rel 2)"); commment("if all terminated jump over all in next jump");
+        instr("nop to be replaced to after loop to finish this thread");
+        int nop2Tofinishthisprog = currLine-1;
+
+        // start of varrequest, already went through watching terminated thread
+        program.set(noTerminatedChild_jumpToVarRequest, "{-" + noTerminatedChild_jumpToVarRequest + "-}\t\t" + "Jump " + " (Rel " + (currLine - noTerminatedChild_jumpToVarRequest) + ")\t{- no terminated child threads, start checkvar-}");
+
+        // what has to be done for varrequest
+        instr("Nop"); commment("after checking for terminated child thread \n\n\t\tand start of checking var Request");
+        int noVarRequestSoBackToBeginLoop = checkMatchSprockellID(req_SprillID);
+        // set back to begin loop
+        program.set(noVarRequestSoBackToBeginLoop, "{-" + noVarRequestSoBackToBeginLoop + "-}\t\t" + "Jump " + " (Rel (" + (startloop-(currLine-1)) + "))\t{- jump back to start of loop variable request and terminatethread -}");
+        // variable request for this thread
+        int requestedHeapLoc = readFromShared(heaplocOrValue);
+        int registerForRequestedVar = getemptyreg();
+        instr("Load (IndAddr "+ requestedHeapLoc + ") "+ registerForRequestedVar);
+        writeRegisterToShared(registerForRequestedVar, heaplocOrValue);
+        clearreg(requestedHeapLoc);
+        clearreg(registerForRequestedVar);
+        writeImmToShared(-1, req_SprillID);
+        instr("Jump (Rel (" + (startloop-currLine) + ") )"); commment("jump back to start of loop for Var Request and terminate/start Thread");
+
+        // to clean up this thread
+        program.set(nop2Tofinishthisprog, "{-" + nop2Tofinishthisprog + "-}\t\t" + "Jump " + " (Rel " + (currLine-nop2Tofinishthisprog) + ")\t{- all child progs terminated, finishing this threads tasks -}");
+        if (currParallelThread != 0) {
+            // when not main thread singal termination to parent thread
+            commment("\n\n\t\t\tsending termination signal to parent parallel-handler");
+            looplock(startProgLock);
+            int parentthread = symtable.currentscope.parentId();
+            clearreg(writeImmToShared(1, terminatedOrStart));
+            System.out.println("parentthread: "+ parentthread);
+            clearreg(writeImmToShared(currParallelThread, ProgID));
+        }
+        commment("\n\n\n\t\t\tend of parallelLine, continuing after join");
+        return null;
+    }
+
+    @Override
+    public Object visitSequential(GrammarParser.SequentialContext ctx) {
+        // setup
+        this.registers = new boolean[REGISTER_COUNT];
+        this.heaptop = 0;
+        this.currLine = 0;
+        this.sprockellAndprogID++;
+        this.programs.add(new ArrayList<>());
+        this.program = this.programs.get(sprockellAndprogID);
+        System.out.println("prog and sprockel ID: " + sprockellAndprogID);
+
+
+        // let it wait until activated
+        int obtained_value = readFromShared(ProgID);
+        instr(String.format("Compute Equal %s %s %s", regSprockelID, obtained_value, obtained_value));
+        instr(String.format("Branch %s (Rel (%s))", obtained_value, 2));
+        clearreg(obtained_value);
+        instr(String.format("Jump (Rel (%s))", -4));// 2 from instr above and 2 from readfromShared
+
+
+
+        instr("WriteInstr 1 numberIO");
+        commment("activated thread");
+
+
+
+
+
+        clearreg(writeImmToShared(-1, ProgID)); // order resets important, otherwise dirty write possiblecommment("reset ProgID");
+        clearreg(writeImmToShared(0, terminatedOrStart));commment("reset terminatedOrStarted");
+        clearreg(writeImmToShared(0, startProgLock));commment("reset startProgLock, so other threads can signal termination or activation of thread\n\n\t\t\tDone with cleanup start thread");
+        // end wait instructions
+        symtable.openScope(sprockellAndprogID);
+        for (RuleContext line : ctx.line()) {
+            visit(line);
+        }
+        symtable.closeScope();
+        looplock(startProgLock);
+        clearreg(writeImmToShared(1, terminatedOrStart));
+        System.out.println("parentthread: "+ currParallelThread);
+        clearreg(writeImmToShared(currParallelThread, ProgID));
+        return sprockellAndprogID;
+    }
+
+    @Override
+    public Object visitLockLine(GrammarParser.LockLineContext ctx) {
+        if (ctx.LOCK() != null) {
+        } else if (ctx.UNLOCK() != null) {
+
+        } else {
+            throw new RuntimeException("no other option than LOCKING or UNLOCKING in lockline");
+        }
+        return null;
+    }
+
+
+
+    //  ----------------------------function stuff-------------------------------------------------
     @Override
     public Object visitFunction(GrammarParser.FunctionContext ctx) {
         if (this.firstTime) {
@@ -151,9 +424,12 @@ public class SPRILGenerator extends GrammarBaseVisitor {
         int resultreg;
 //        System.out.println(ctx.FUNNAME().getText());
         System.out.println("----------in functioncall: "+ctx.getText());
-        System.out.println(ctx.expr().size());
-        System.out.println(ctx.expr(0).getText());
         switch (ctx.FUNNAME().getSymbol().getText()) {
+            case "Nop":
+                resultreg = getemptyreg();
+                instr("Nop");
+                commment("end explicit Nop");
+                return resultreg;
             case "InNumber":
                 resultreg = getemptyreg();
                 instr("ReadInstr numberIO");
@@ -192,20 +468,14 @@ public class SPRILGenerator extends GrammarBaseVisitor {
     }
 
     //  ----------------------------lines-------------------------------------------------
-    private void not(int register) {
-        int truereg = getemptyreg();
-        instr("Load (ImmValue " + "1)" + " " + truereg);
-        instr("Compute Xor "+ truereg + " " + register + " " + register);
-        clearreg(truereg);
-    }
 
     @Override
     public Object visitDeclLine(GrammarParser.DeclLineContext ctx) {
         String varname = ctx.VARNAME().getText();
         List<Integer> types = (List<Integer>) visit(ctx.types());
+        symtable table = this.symtable;
         // visit the expression, its return value is the register in which the value resides
         if (ctx.ASGN() != null) {
-            int storedaddr = this.heaptop;
             int value;
             System.out.println("assign not null");
             if (ctx.expr() != null) {
@@ -217,18 +487,19 @@ public class SPRILGenerator extends GrammarBaseVisitor {
                 value = (int) visit(ctx.functioncall());
             }
             instr(store(value));
+            int storedaddr = this.heaptop-1;
             clearreg(value);
-            symtable.add(varname, types,  storedaddr);
+            table.add(varname, types,  storedaddr);
             commment("declLine: "+ "varname: "+ varname + " stored at "+ storedaddr +" types: "+ types + " expr: "+ ctx.expr().getText());
             System.out.println("declLine: "+ "varname: "+ varname +" types: "+ types + " expr: "+ ctx.expr().getText());
         } else {
             // in case of type declaration
             System.out.println("should be last print");
-            symtable.currentscope.addType(varname, types);
+            table.currentscope.addType(varname, types);
 
             // todo: check if this is appropriate solution for nullpointer
             // todo: for (valid) program: Int b; Int c; if true {Int b = 10;} else {Int c = 20;}OutNumber b;
-            symtable.currentscope.addLoc(varname, heaptop++);
+            table.currentscope.addLoc(varname, heaptop++);
         }
         return null;
     }
@@ -255,11 +526,12 @@ public class SPRILGenerator extends GrammarBaseVisitor {
     @Override
     public Object visitIfLine(GrammarParser.IfLineContext ctx) {
         List<Integer> nopsendblock = new ArrayList<>();
+        symtable table = this.symtable;
         for (int i= 0; i < ctx.OCUR().size(); i++) {
             int opencur = ctx.children.indexOf(ctx.OCUR((i)));
             int closecur = ctx.children.indexOf(ctx.CCUR(i));
             int heap_backup = this.heaptop;
-            symtable.openScope();
+            table.openScope(sprockellAndprogID); // todo check needed
             // so if or elif
             int expr = rnone;
             if (! ctx.getChild(opencur-1).getText().equals("else")) {
@@ -271,13 +543,11 @@ public class SPRILGenerator extends GrammarBaseVisitor {
             int nop_index = this.currLine - 1;
             if (expr != rnone) {
                 clearreg(expr);
-            } else {
-
             }
             for (int j = opencur+1; j < closecur; j++) {
                 visit(ctx.getChild(j));
             }
-            symtable.closeScope();
+            table.closeScope();
             this.heaptop = heap_backup;
             if (! ctx.getChild(opencur-1).getText().equals("else")) {
                 program.set(nop_index, "{-" + nop_index + "-}\t\t" + "Branch " + expr + " (Rel " + (currLine+1 - nop_index) + ")\t{- no if/elif conditional jump-}");
@@ -294,8 +564,9 @@ public class SPRILGenerator extends GrammarBaseVisitor {
 
     @Override
     public Object visitWhileLine(GrammarParser.WhileLineContext ctx) {
+        symtable table = symtable;
         int heap_backup = this.heaptop;
-        symtable.openScope();
+        table.openScope(sprockellAndprogID);
         int startwhile = currLine;
         int expr = (int) visit(ctx.expr());
         not(expr);
@@ -399,10 +670,28 @@ public class SPRILGenerator extends GrammarBaseVisitor {
         String varname = ctx.getText();
         int resultreg = getemptyreg();
         int heaploc = symtable.getHeapLoc(varname);
-        instr("Load (DirAddr "+ heaploc + ") "+ resultreg);
+        System.out.println("apparent sprockell var: "+ symtable.sprilID(varname));
+        System.out.println("symtable id: "+ symtable.sprilID(varname));
+        if (symtable.sprilID(varname) != sprockellAndprogID || symtable.sprilID(varname) == currParallelThread) { // so variable has to be requested from sprockell where declared
+            // set proper values to shared memory addresses, polled last
+            clearreg(resultreg);
+            looplock(req_Lock);
+            clearreg(writeImmToShared(purerequest, req_Type));
+            int written_value = writeImmToShared(heaploc, heaplocOrValue);
+            clearreg(written_value);
+            int written_sprilID = writeImmToShared(symtable.sprilID(varname), req_SprillID); // as last since that one is polled
+            // loop to check updated value todo: add if for when value is locked
+            clearreg(checkPollChanged(written_sprilID,req_SprillID));
+            resultreg = readFromShared(heaplocOrValue);
+            // reset polled memory address
+            clearreg(writeImmToShared(0, req_Type));
+            clearreg(writeImmToShared(0, req_Lock));
+        } else {
+            // variable declared in this sprockell
+            instr("Load (DirAddr "+ heaploc + ") "+ resultreg);
+        }
         return resultreg;
     }
-
     //  ----------------------------comp-------------------------------------------------
     @Override
     public Object visitComp(GrammarParser.CompContext ctx) {
@@ -443,6 +732,19 @@ public class SPRILGenerator extends GrammarBaseVisitor {
     }
 
     //  ----------------------------types: always return an integer-------------------------------------------------
+    public static class types{ // TODO capitalize all finals
+        //	0 = Int
+        //	1 = Boolean
+        //	2 = Char (currently unused)
+        //	3 = String
+        //	4 = Array
+        //	The types belonging to each int are as follows:
+        public static final int INT = 0;
+        public static final int BOOLEAN = 1;
+        public static final int STRING = 3;
+        public static final int ARRAY = 4;
+    }
+
     @Override
     public Object visitStr(GrammarParser.StrContext ctx) {
         return new ArrayList<>(List.of(STRING));
@@ -465,7 +767,7 @@ public class SPRILGenerator extends GrammarBaseVisitor {
         return new ArrayList<>(List.of(BOOLEAN));
     }
 
-//  ----------------------------utilities-------------------------------------------------
+//  ----------------------------utilities progs-------------------------------------------------
 
     private void instr(String s) {
         this.program.add("{-"+currLine+"-}\t\t"+ s);
@@ -482,6 +784,10 @@ public class SPRILGenerator extends GrammarBaseVisitor {
 
 
     public static void main(String[] args) {
+        convertProgToFile("Int a = 5; parallel {" +
+                "sequential {OutNumber a;}}","");
+//                "sequential {Int b = 5; OutNumber b; OutNumber 5;}}","");
+//        convertProgToFile("Int a = 4; OutNumber a; OutNumber 4;","");
 //        convertProgToFile("Fun Int Mult2 Int a Int v {a = a*2 ;return a}\n" +
 //                "Fun Int Stupid Int f {Int t = f + f; return t+t} Int a = Mult2 5 4;","");
 //        convertProgToFile("Fun Int Mult2 Int a Int v {a = a*2 ;return a}", "/newfile");
@@ -511,11 +817,11 @@ public class SPRILGenerator extends GrammarBaseVisitor {
         if (location.equals("")) {
             location = "temp";
         }
-        return generateFile(generator.program, program,location);
+        return generator.generateFile(generator.programs, program,location);
     }
 
     public static final String src = "src\\sprockell\\src\\";
-    private static String generateFile(List<String> a, String program, String location) {
+    private String generateFile(List<List<String>> programs, String program, String location) {
         Writer writer;
         String fileloc = null;
         try {
@@ -523,29 +829,33 @@ public class SPRILGenerator extends GrammarBaseVisitor {
             writer = new BufferedWriter(new OutputStreamWriter(
                     new FileOutputStream(fileloc+".hs"), StandardCharsets.UTF_8));
             try {
-                System.out.println("import Sprockell\n\n");
-                System.out.println("--\t" + program);
-                System.out.println("prog :: [Instruction]");
-                System.out.println("prog = [");
                 writer.write("import Sprockell\n\n");
-                writer.write("--\t"+ program + "\n");
-                writer.write("prog :: [Instruction]\n");
-                writer.write("prog = [\n");
-                int i;
-                for (i=0; i <= a.size()-2; i++) {
-                    System.out.println(a.get(i)+ ",");
-//                    System.out.println("\n");
-                    writer.write(a.get(i) + ",");
-                    writer.write("\n");
+                writer.write("--\t" + program + "\n");
+                String allProgs = "";
+                for (int prog=0; prog < programs.size(); prog++) {
+                    writer.write("\n\nprog"+ prog+ " :: [Instruction]\n");
+                    writer.write("\nprog"+ prog + " = [\n");
+                    allProgs += "prog"+ prog+ ",";
+                    List<String> proglines = programs.get(prog);
+                    for (int i = 0; i <= proglines.size()-1; i++) {
+                        writer.write(proglines.get(i) + ",");
+                        writer.write("\n");
+                    }
+                    writer.write("\t\t\tEndProg\n\t\t]");
                 }
-//                System.out.println("last index: "+ i + (a.size()-1));
-                System.out.println(a.get(i));
-                writer.write(a.get(i));
-                writer.write("\n\t\t\t,EndProg\n\t]");
-                System.out.println("\t\t\t,EndProg");
-                System.out.println("\t]");
-                writer.write("\nmain = run [prog]\n");
-                System.out.println("\nmain = run [prog]");
+                allProgs = allProgs.substring(0, allProgs.length()-1);
+                writer.write("\nmain = run ["+allProgs+ "]\n");
+                writer.write("\n\nmain2 = runWithDebugger (debuggerSimplePrintAndWait myShow) ["+allProgs+"]");
+                writer.write("\n\nmain3 = runWithDebugger (debuggerPrintCondWaitCond showLocalMem doesLocalMemWrite never) ["+allProgs+"]");
+
+
+                writer.write("\n\nshowLocalMem :: DbgInput -> String\n" +
+                        "showLocalMem ( _ , systemState ) = show $ localMem $ head $ sprStates systemState");
+                writer.write("\n\ndoesLocalMemWrite :: DbgInput -> Bool\n" +
+                        "doesLocalMemWrite (instrs,st) = any isStoreInstr instrs\n" +
+                        "    where\n" +
+                        "        isStoreInstr (Store _ _) = True\n" +
+                        "        isStoreInstr _ = False");
                 writer.close();
             } catch (IOException f) {
                 f.printStackTrace();

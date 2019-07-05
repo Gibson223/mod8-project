@@ -4,7 +4,7 @@ program: (function | line)+ EOF;
 
 function: FUN (types)? FUNNAME (types VARNAME)* OCUR line+ (RETURN expr)? CCUR;
 
-sequential: SEQUENTIAL OCUR line* CCUR;
+sequential: SEQUENTIAL OCUR line+ CCUR; // must have at least one line otherwise useless
 line
 	: IF expr OCUR line* CCUR
 		(ELIF expr OCUR line* CCUR)*

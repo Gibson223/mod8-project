@@ -8,10 +8,6 @@ public class symtable{
     public innertable currentscope;
     private int topbeforenewscope; // requires a rename
 
-    public symtable() {
-//        this.root = new innertable();
-//        this.currentscope = root;
-    }
     public symtable(boolean str) {
         if (str) {
             this.root = new innertable();
@@ -21,12 +17,27 @@ public class symtable{
         this.currentscope = root;
     }
 
-    public void openScope() {
+    public int sprilID(String id) {
+        innertable curr = currentscope;
+        while (curr != root) {
+            if (curr.contains(id)) {
+                return curr.sprockel_ID;
+            }
+            curr = curr.parent;
+        }
+        if (this.root.contains(id)) {
+            return this.root.sprockel_ID;
+        }
+        throw new RuntimeException("no sprockellID for variable name");
+    }
+
+
+    public void openScope(int sprillID) {
         if (this.root == null) {
-            this.root = new innertable();// todo check whether 0 is correct value
+            this.root = new innertable();
             this.currentscope = root;
         } else {
-            innertable child = new innertable(currentscope);
+            innertable child = new innertable(currentscope, sprillID);
             this.currentscope = child;
         }
     }
@@ -90,19 +101,24 @@ public class symtable{
         private HashMap<String, List<Integer>> type = new HashMap<>();
         public HashMap<String, Integer> heaplocation = new HashMap<>();
         private innertable parent;
-        public innertable(innertable parent) {
-            this.parent = parent;
+        private int sprockel_ID;
+        public innertable(innertable parent, int sprilid) {
+            this.parent = parent; sprockel_ID = sprilid;
         }
         public innertable(){
-            this.parent = null;
+            this.parent = null; sprockel_ID = 0;
         }
 
-        // for getting the heap spot of variable
+        // for getting the
         public int getHeapLoc(String id) {
             if (!this.type.containsKey(id)) {
                 throw new RuntimeException("tried to get heaplocation for undeclared var");
             }
             return this.heaplocation.get(id);
+        }
+
+        public int parentId() {
+            return this.parent.sprockel_ID;
         }
 
         // todo figure out if this one is actually ever used
