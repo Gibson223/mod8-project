@@ -187,11 +187,11 @@ public class sprilTest {
 //                    Arrays.asList(sprolprint(1, 10),sprolprint(0,5)));
 
         assertProg("Int a = 5; parallel { " +
-                        "sequential {Int a = 10; OutNumber a;}" +
+//                        "sequential {Int a = 10; OutNumber a;}" +
                         "sequential {Int a = 10; OutNumber a;}" +
                         "} OutNumber a;",
-                Arrays.asList(sprolprint(0,5),
-                        sprolprint(1, 10),sprolprint(1, 10)));
+                Arrays.asList(sprolprint(1, 10),sprolprint(0,5)
+                        ));
 //        assertProg("Int a = 5; parallel { " +
 //                        "sequential {OutNumber 10;}} OutNumber a;",
 //                Arrays.asList(sprolprint(1, 10)));
@@ -209,9 +209,14 @@ public class sprilTest {
     @Test
     public void concurrencystuffTest() {
         assertProg("Int a = 5;parallel {" +
-                "sequential {Nop;}" +
-//                "sequential {OutNumber a;}" +
-                "sequential {Nop;}"+
-                "} OutNumber a;Nop;",new ArrayList<>());
+                "sequential {Int a = 10;}" +
+                "sequential {OutNumber a;}" +
+                "sequential {Int a = 30;}"+
+                "} OutNumber a;",
+                Arrays.asList(sprolprint(2,5),sprolprint(0,5)));
+//        assertProg("Int a = 1; Int b= 2; parallel {" +
+//                "sequential {OutNumber a; a = 2;}" +
+//                "sequential{OutNumber b;}" +
+//                "} ");
     }
 }

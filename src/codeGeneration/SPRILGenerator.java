@@ -28,8 +28,10 @@ public class SPRILGenerator extends GrammarBaseVisitor {
     private HashMap<String, RuleContext> validFunctions;
     private boolean firstTime; // visit functions to save names then
     private int sprockellAndprogID;
+    private boolean mergedto1;
 
     public static final int REGISTER_COUNT = 6;
+    private static final boolean DEBUG = false;
     public SPRILGenerator() {
         this.program = new ArrayList<>();
         this.currLine = 0;
@@ -152,6 +154,7 @@ public class SPRILGenerator extends GrammarBaseVisitor {
     // returns where the jump should be placed for when there is no match
     private int checkMatchSprockellID(int shmlocation){
         int read_sprockelID = readFromShared(shmlocation);
+        commment("read shmemory address as part of checkmatchsprockelid");
         instr("Compute Equal "+ read_sprockelID + " " + regSprockelID + " " + read_sprockelID);
         instr(String.format("Branch %s (Rel 2)", read_sprockelID));
         commment("read sprockell id equals expected sprockellid, so continue after jump");
@@ -178,15 +181,10 @@ public class SPRILGenerator extends GrammarBaseVisitor {
         instr(String.format("WriteInstr %s (DirAddr %s)", emptyreg,terminatedOrStart) );
         clearreg(emptyreg);
         int poppedsprillid = pop();
-
-
-
-        instr("WriteInstr "+ poppedsprillid + " numberIO");
-        commment("which sprockell should now be activated");
-
-
-
-
+        if (DEBUG) {
+            instr("WriteInstr "+ poppedsprillid + " numberIO");
+            commment("which sprockell should now be activated");
+        }
         instr(String.format("WriteInstr %s (DirAddr %s)", poppedsprillid, ProgID));
         // poll to check value changed
 
@@ -227,7 +225,7 @@ public class SPRILGenerator extends GrammarBaseVisitor {
         public static final int terminatedOrStart = 7; // set to 1 if prog to start
 
         // vaules for shm address 1
-        public static final int setting_up= 0;
+        public static final int updaterequest= 0;
         public static final int purerequest = 1;
         public static final int requestAndlock = 2;
         public static final int unlockAndwriteBack = 3;
@@ -294,11 +292,17 @@ public class SPRILGenerator extends GrammarBaseVisitor {
 
 
 
+        if (DEBUG) {
+            instr("WriteInstr "+ tobeterminatedprograms+ " numberIO");
+            commment("can be deleted after testing");
+        }
 
-        instr("WriteInstr "+ tobeterminatedprograms+ " numberIO");
-        commment("can be deleted after testing");
+
+
         instr(String.format("Compute Decr %s %s %s", tobeterminatedprograms, tobeterminatedprograms, tobeterminatedprograms));commment("decremented amount of child threads needed to be terminated still");
-
+        clearreg(writeImmToShared(0, terminatedOrStart));commment("reset terminateorStart to 0");
+        clearreg(writeImmToShared(-1, ProgID));commment("reset progID to -1");
+        clearreg(writeImmToShared(0, startProgLock));commment("release lock after read terminatedchild");
 
 
 
@@ -337,6 +341,7 @@ public class SPRILGenerator extends GrammarBaseVisitor {
             clearreg(writeImmToShared(currParallelThread, ProgID));
         }
         commment("\n\n\n\t\t\tend of parallelLine, continuing after join");
+        this.mergedto1 = true;
         return null;
     }
 
@@ -359,15 +364,10 @@ public class SPRILGenerator extends GrammarBaseVisitor {
         clearreg(obtained_value);
         instr(String.format("Jump (Rel (%s))", -4));// 2 from instr above and 2 from readfromShared
 
-
-
-        instr("WriteInstr 1 numberIO");
-        commment("activated thread");
-
-
-
-
-
+        if (DEBUG) {
+            instr("WriteInstr 1 numberIO");
+            commment("activated thread");
+        }
         clearreg(writeImmToShared(-1, ProgID)); // order resets important, otherwise dirty write possiblecommment("reset ProgID");
         clearreg(writeImmToShared(0, terminatedOrStart));commment("reset terminatedOrStarted");
         clearreg(writeImmToShared(0, startProgLock));commment("reset startProgLock, so other threads can signal termination or activation of thread\n\n\t\t\tDone with cleanup start thread");
@@ -377,6 +377,8 @@ public class SPRILGenerator extends GrammarBaseVisitor {
             visit(line);
         }
         symtable.closeScope();
+
+        commment("\n\n\t\t\tcleanup for thread below");
         looplock(startProgLock);
         clearreg(writeImmToShared(1, terminatedOrStart));
         System.out.println("parentthread: "+ currParallelThread);
@@ -672,8 +674,12 @@ public class SPRILGenerator extends GrammarBaseVisitor {
         int heaploc = symtable.getHeapLoc(varname);
         System.out.println("apparent sprockell var: "+ symtable.sprilID(varname));
         System.out.println("symtable id: "+ symtable.sprilID(varname));
-        if (symtable.sprilID(varname) != sprockellAndprogID || symtable.sprilID(varname) == currParallelThread) { // so variable has to be requested from sprockell where declared
+        System.out.println("sprockellID: "+ sprockellAndprogID);
+        System.out.println("currparallel: "+ currParallelThread);
+        System.out.println("mergedto1: "+ mergedto1);
+        if (symtable.sprilID(varname) != sprockellAndprogID ^ (mergedto1 && currParallelThread == 0)) { // so variable has to be requested from sprockell where declared
             // set proper values to shared memory addresses, polled last
+            System.out.println("trying to request variable");
             clearreg(resultreg);
             looplock(req_Lock);
             clearreg(writeImmToShared(purerequest, req_Type));
@@ -688,6 +694,7 @@ public class SPRILGenerator extends GrammarBaseVisitor {
             clearreg(writeImmToShared(0, req_Lock));
         } else {
             // variable declared in this sprockell
+            System.out.println("variable can be found in own heap");
             instr("Load (DirAddr "+ heaploc + ") "+ resultreg);
         }
         return resultreg;
