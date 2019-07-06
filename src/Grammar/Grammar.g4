@@ -1,6 +1,6 @@
 grammar Grammar;
 
-program: (function | line)+ EOF;
+program: (function|line)+ EOF;
 
 function: FUN (types)? FUNNAME (types VARNAME)* OCUR line+ (RETURN expr)? CCUR;
 
@@ -9,6 +9,7 @@ line
 	: IF expr OCUR line* CCUR
 		(ELIF expr OCUR line* CCUR)*
 		(ELSE OCUR line* CCUR)?							#ifLine
+	//for is not supported at this moment
 	| FOR (VARNAME | INT VARNAME ASGN expr) SCOL
 		expr SCOL
 		VARNAME ASGN expr SCOL
@@ -17,8 +18,10 @@ line
 	| PARALLEL OCUR sequential+ CCUR                  	#parallelLine
     | types VARNAME
         (ASGN expr | ASGN functioncall)? SCOL	        #declLine
+    //function calls not supported yet
     | target ASGN (expr | functioncall) SCOL      		#asgnLine
     | (LOCK | UNLOCK) VARNAME SCOL              		#lockLine
+    //function calls not supported yet
     | functioncall SCOL                             	#funcallLine
     ;
 
@@ -31,6 +34,7 @@ expr
 	| (NUM | TRUE | FALSE | STRING)						#constExpr
 	| VARNAME OSQR expr CSQR							#arrExpr
 	| VARNAME											#varExpr
+	//arays are not fully supported at this moment
 	| OSQR expr (COM expr)* CSQR             		    #listExpr
 	; 
 
@@ -45,6 +49,7 @@ comp
 
 target
     : VARNAME              								#varTarget
+    //arrays are not fully supported at this moment
     | VARNAME OSQR expr CSQR 							#arrayTarget
     ;
 
@@ -55,6 +60,7 @@ types
 	| BOOL                                      		#bool
 	//| CHAR                                      		#char
 	| STR                                       		#str
+	//arrays are not fully supported at this moment
 	| ARRAY types                               		#array
     ;
 
@@ -113,6 +119,8 @@ fragment COMP: EQ | NEQ | LT | LET | GT | GET;
 FUNNAME: UPPERCASE (LETTER | DIGIT)*;
 VARNAME: LOWERCASE (LETTER | DIGIT)*;
 NUM: DIGIT+;
+
+//no whitespace allowed in strings!
 STRING: '"' [\u0000\u0021\u0023-\uFFFE]* '"';
 // CHARACTER: '\'' . '\'';
 

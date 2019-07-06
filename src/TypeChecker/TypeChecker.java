@@ -39,26 +39,25 @@ public class TypeChecker extends GrammarBaseListener {
 //	Int is given as [0]
 //	Array Array Int is given as [4, 4, 0]
 
-	public String decideType(String expression) throws ParseException {
-		String typeString = null;
+	public boolean checkProgram(String expression) throws ParseException {
 		CharStream charStream = CharStreams.fromString(expression);
 		Lexer lexer = new GrammarLexer(charStream);
 		TokenStream tokenStream = new CommonTokenStream(lexer);
 		GrammarParser grammarParser = new GrammarParser(tokenStream);
-		//TODO: Decide the right thing to use (program() or line() or ...)
 		ParseTree tree = grammarParser.program();
 
 		this.parseTreeProperty = new ParseTreeProperty<>();
 		this.parseTree = tree;
 		new ParseTreeWalker().walk(this, tree);
-		ArrayList typeArray = this.parseTreeProperty.get(this.parseTree);
+
+		//if an error occurred while walking the program, then throw a parseException
+		//else return true, as the program is correctly typed
 		if (this.error != null) {
 			String errorSpot = expression.substring(this.errorOffset, this.errorEnd+1);
 			throw new ParseException(this.error + errorSpot + "; Index in input: " + this.errorEnd + "; ", this.errorEnd);
+		} else {
+			return true;
 		}
-
-		//TODO: Check typeArray and decide type to return based on that
-		return typeString;
 	}
 
 	public TypeChecker() {
@@ -71,7 +70,7 @@ public class TypeChecker extends GrammarBaseListener {
 
 	public String getError(String expression) {
 		String errorSpot = expression.substring(this.errorOffset, this.errorEnd+1);
-		return this.error + errorSpot + "; Index in input: " + this.errorEnd + ";";
+		return this.error + "\"" + errorSpot + "\"; Index in input: " + this.errorEnd + ";";
 	}
 
 	public boolean typeCorrect() {
@@ -106,7 +105,6 @@ public class TypeChecker extends GrammarBaseListener {
 
 		variableTable.openScope();
 	}
-	//TODO: check if the for loop with expr works as expected
 	@Override
 	public void exitIfLine(GrammarParser.IfLineContext ctx) {
 		//if a typeError already occurred, then just return
@@ -133,6 +131,7 @@ public class TypeChecker extends GrammarBaseListener {
 		}
 	}
 
+	//TODO: For loops not supported for now
 	@Override
 	public void enterForLine(GrammarParser.ForLineContext ctx) {
 		//if a typeError already occurred, then just return
@@ -147,7 +146,7 @@ public class TypeChecker extends GrammarBaseListener {
 		type.add(0);
 		variableTable.add(varName, type);
 	}
-	//TODO: second varname check
+	//TODO: For loops not supported for now
 	@Override
 	public void exitForLine(GrammarParser.ForLineContext ctx) {
 		//if a typeError already occurred, then just return
@@ -155,6 +154,7 @@ public class TypeChecker extends GrammarBaseListener {
 			return;
 		}
 
+		//TODO: do second varname check
 		if(ctx.INT() != null) {
 			ArrayList<Integer> type = this.parseTreeProperty.get(ctx.getChild(4));
 			if(!type.get(0).equals(1)) {
@@ -265,6 +265,7 @@ public class TypeChecker extends GrammarBaseListener {
 		ArrayList<Integer> type = this.parseTreeProperty.get(ctx.getChild(0));
 		if(ctx.getChildCount() != 3) {
 			ArrayList<Integer> assignType = this.parseTreeProperty.get(ctx.getChild(3));
+			boolean b = type.equals(assignType);
 			if (!type.equals(assignType)) {
 				this.error = "Cannot assign to declared variable, wrong variable type; At: ";
 				this.errorOffset = ctx.getStart().getStartIndex();
@@ -463,7 +464,7 @@ public class TypeChecker extends GrammarBaseListener {
 			}
 		}
 
-		//put the right type in the parseTree (even if type checking went wrong to prevent nullpointers)
+		//put the right type in the parseTree
 		if(left.get(0).equals(0)) {
 			//type is int
 			type.add(0);
@@ -528,7 +529,6 @@ public class TypeChecker extends GrammarBaseListener {
 			this.errorOffset = ctx.getStart().getStartIndex();
 			this.errorEnd = ctx.getStop().getStopIndex();
 		}
-		//TODO: will currently give nullpointer exceptions if the variable does not exist as no type can be put in the parseTree
 
 		if (ctx.exception != null) {
 			this.error = "No valid Arr variable found; At: ";
@@ -553,7 +553,6 @@ public class TypeChecker extends GrammarBaseListener {
 			this.errorOffset = ctx.getStart().getStartIndex();
 			this.errorEnd = ctx.getStop().getStopIndex();
 		}
-		//TODO: will currently give nullpointer exceptions if the variable does not exist as no type can be put in the parseTree
 
 		if (ctx.exception != null) {
 			this.error = "No valid variable found; At: ";
@@ -618,7 +617,6 @@ public class TypeChecker extends GrammarBaseListener {
 			this.errorOffset = ctx.getStart().getStartIndex();
 			this.errorEnd = ctx.getStop().getStopIndex();
 		}
-		//TODO: will currently give nullpointer exceptions if the variable does not exist as no type can be put in the parseTree
 
 		if (ctx.exception != null) {
 			this.error = "No valid variable found; At: ";
@@ -650,7 +648,6 @@ public class TypeChecker extends GrammarBaseListener {
 			this.errorOffset = ctx.getStart().getStartIndex();
 			this.errorEnd = ctx.getStop().getStopIndex();
 		}
-		//TODO: will currently give nullpointer exceptions if the variable does not exist as no type can be put in the parseTree
 
 		if (ctx.exception != null) {
 			this.error = "No valid Arr variable found; At: ";
