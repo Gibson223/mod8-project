@@ -289,23 +289,15 @@ public class SPRILGenerator extends GrammarBaseVisitor {
         int noTerminatedChild_jumpToVarRequest = checkMatchSprockellID(ProgID);
         // child thread terminated
 
-
-
-
         if (DEBUG) {
             instr("WriteInstr "+ tobeterminatedprograms+ " numberIO");
             commment("can be deleted after testing");
         }
 
-
-
         instr(String.format("Compute Decr %s %s %s", tobeterminatedprograms, tobeterminatedprograms, tobeterminatedprograms));commment("decremented amount of child threads needed to be terminated still");
         clearreg(writeImmToShared(0, terminatedOrStart));commment("reset terminateorStart to 0");
         clearreg(writeImmToShared(-1, ProgID));commment("reset progID to -1");
         clearreg(writeImmToShared(0, startProgLock));commment("release lock after read terminatedchild");
-
-
-
 
         instr("Branch "+ tobeterminatedprograms + "(Rel 2)"); commment("if all terminated jump over all in next jump");
         instr("nop to be replaced to after loop to finish this thread");
@@ -319,9 +311,19 @@ public class SPRILGenerator extends GrammarBaseVisitor {
         int noVarRequestSoBackToBeginLoop = checkMatchSprockellID(req_SprillID);
         // set back to begin loop
         program.set(noVarRequestSoBackToBeginLoop, "{-" + noVarRequestSoBackToBeginLoop + "-}\t\t" + "Jump " + " (Rel (" + (startloop-(currLine-1)) + "))\t{- jump back to start of loop variable request and terminatethread -}");
+
         // variable request for this thread
         int requestedHeapLoc = readFromShared(heaplocOrValue);
+        //extra checks
+        //check if it is locked. then return
+        instr(String.format("Compute Decr %s %s %s", requestedHeapLoc, requestedHeapLoc, requestedHeapLoc));
+        commment("check location of lock for variable on heap");
         int registerForRequestedVar = getemptyreg();
+        instr("Load (IndAddr "+ requestedHeapLoc + ") "+ registerForRequestedVar);
+        commment("loading lock value");
+        instr(String.format("Branch %s (Rel (%s))"));
+        // end extra checks
+
         instr("Load (IndAddr "+ requestedHeapLoc + ") "+ registerForRequestedVar);
         writeRegisterToShared(registerForRequestedVar, heaplocOrValue);
         clearreg(requestedHeapLoc);
@@ -681,14 +683,29 @@ public class SPRILGenerator extends GrammarBaseVisitor {
             // set proper values to shared memory addresses, polled last
             System.out.println("trying to request variable");
             clearreg(resultreg);
+            int startloop = currLine;
+            commment("\n\n\t\t\tstart of loop for varrequest, so when var locked try again");
             looplock(req_Lock);
             clearreg(writeImmToShared(purerequest, req_Type));
             int written_value = writeImmToShared(heaploc, heaplocOrValue);
             clearreg(written_value);
             int written_sprilID = writeImmToShared(symtable.sprilID(varname), req_SprillID); // as last since that one is polled
-            // loop to check updated value todo: add if for when value is locked
-            clearreg(checkPollChanged(written_sprilID,req_SprillID));
+
+            // check whether value is locked, if locked new sprillid = -2
+            int new_sprill_id = checkPollChanged(written_sprilID,req_SprillID); // set to -22 if locked var
+            int expected_when_locked = getemptyreg();
+            instr("Load (ImmValue (-2)) "+ expected_when_locked);
+            instr(String.format("Compute NEq %s %s %s", new_sprill_id, expected_when_locked, expected_when_locked));
+            clearreg(new_sprill_id);
+            instr(String.format("Branch %s (Rel (%s))",expected_when_locked, 8 ));
+            clearreg(writeImmToShared(0, req_Type));commment("reset since var locked"); // 2 instr
+            clearreg(writeImmToShared(0, req_SprillID));commment("reset since var locked"); // 2 instr
+            clearreg(writeImmToShared(0, req_Lock));commment("reset since var locked"); // 2 instr
+            instr(String.format("Jump (Rel (%s))", startloop- (currLine-1))); // 1 instr
+            clearreg(expected_when_locked);
+            // var not locked, so proceed normally
             resultreg = readFromShared(heaplocOrValue);
+            commment("poll part of regular read of request, since var not locked");
             // reset polled memory address
             clearreg(writeImmToShared(0, req_Type));
             clearreg(writeImmToShared(0, req_Lock));
