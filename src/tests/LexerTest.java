@@ -57,7 +57,7 @@ public class LexerTest {
         // optional elif
         correctline("if true {Bool omfd;} else {Int a;}");
         // diff amount of elifs
-        correctline("if 5 {for i; i > 10 ; i = i -5; {a =10;}}");// TODO move to nesting
+        correctline("if 5 {for i; i > 10 ; i = i -5; {a =10;}}");
         // mandatory if
         wrongline("else {Int a = 5}");
         wrongline("elif 5 {Bool b = 7;} ");
@@ -128,12 +128,11 @@ public class LexerTest {
         correctline("Str a = \"lalala\";");
         correctline("Str a = \"a\"; Str b = \"b\"; aAndb = \"ab\"");
         wrongline("Str a aaaa;");
-//        wrongline("Str a = '7';"); this is already a typerror != syntaxerror
         wrongline("l = 'lala\";");
         correctline("l = \"lalala\";");
 
         // arrays
-        correctline("Bool a = [1,2,3];"); // assigning arr to not arr type is allowed TODO right??
+        correctline("Bool a = [1,2,3];"); //this is allowed here, will be rejected by TypeChecker
         wrongline("Bool a = 5");
         wrongline("Arr Int a = []");
         correctline("Arr Int a = [1];Arr Int a = c;");
@@ -178,7 +177,7 @@ public class LexerTest {
         correctline("lock x;");
         correctline("unlock x;");
         // seen as a valid
-        correctline("Unlock x;"); // TODO maybe find way to exclude otherwise move to fnctioncall
+        correctline("Unlock x;");
         wrongline("lock Int x = 5;");
         wrongline("lock Bool x = [1,2,3,4]");
     }
@@ -201,7 +200,7 @@ public class LexerTest {
         // const
         correctexpr("34342");
         correctexpr("111111");
-        correctexpr("1,2,3,4"); // TODO seen as correct, maybe try to fix
+        correctexpr("1,2,3,4"); // correct here, will be rejected later on if not inside array
         correctexpr("true");
         correctexpr("false");
         //arr
@@ -210,7 +209,7 @@ public class LexerTest {
         correctexpr("a");
         wrongexpr("1+=2");
         //list
-        correctexpr("[1,2,3,4,5]");
+        correctexpr("[1,23,3,4,5]");
         wrongexpr("[1,2,23,3,4,5");
         wrongexpr("[1,23,4,5,6,7,]");
     }
