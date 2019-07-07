@@ -33,7 +33,7 @@ public class SPRILGenerator extends GrammarBaseVisitor {
     private List<String> lockedVariables;
 
     public static final int REGISTER_COUNT = 6;
-    private static final boolean DEBUG = true;
+    private static boolean DEBUG = false;
     public SPRILGenerator() {
         this.program = new ArrayList<>();
         this.currLine = 0;
@@ -302,7 +302,7 @@ public class SPRILGenerator extends GrammarBaseVisitor {
         int noTerminatedChild_jumpToVarRequest = checkMatchSprockellID(ProgID);
         // child thread terminated
 
-        if (DEBUG /*&& false*/) {
+        if (DEBUG) {
             instr("WriteInstr "+ tobeterminatedprograms+ " numberIO");
             commment("thread terminated so decremented count, so print show how many left running now");
         }
@@ -473,7 +473,7 @@ public class SPRILGenerator extends GrammarBaseVisitor {
         clearreg(obtained_value);
         instr(String.format("Jump (Rel (%s))", -4));// 2 from instr above and 2 from readfromShared
 
-        if (DEBUG && false) {
+        if (DEBUG) {
             instr("WriteInstr 1 numberIO");
             commment("activated thread");
         }

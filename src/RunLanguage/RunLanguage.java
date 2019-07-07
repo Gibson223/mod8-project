@@ -35,7 +35,7 @@ public class RunLanguage {
         }
         List<String> res= null;
         try {
-            res = runprog(PROGRAM_STRING);
+            res = tests.sprilTest.runprog(PROGRAM_STRING);
             System.out.println("-------------------");
             System.out.println("res: "+ res);
             System.out.println("=================================================================");
@@ -47,23 +47,5 @@ public class RunLanguage {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
-
-    private static String defaultLoc = "src\\sprockell\\src\\temp.hs";
-    public static List<String> runprog(String program) throws IOException, InterruptedException {
-        String fileloc = SPRILGenerator.convertProgToFile(program,"temp");
-        Process cmd = new ProcessBuilder("cmd.exe", "/C", "bat", "\""+ fileloc + "\"")
-                .redirectErrorStream(true).start();
-        InputStream in = cmd.getInputStream();
-        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-        String line;
-        List res = new ArrayList<String>();
-        while ((line = br.readLine()) != null) {
-            System.out.println("line: " + line);
-            res.add(line);
-        }
-        cmd.waitFor();
-        System.out.println("cmd done");
-        return res;
     }
 }
