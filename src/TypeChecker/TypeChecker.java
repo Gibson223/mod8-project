@@ -52,9 +52,11 @@ public class TypeChecker extends GrammarBaseListener {
 
 		//if an error occurred while walking the program, then throw a parseException
 		//else return true, as the program is correctly typed
-		if (this.error != null) {
+		if (grammarParser.getNumberOfSyntaxErrors() != 0) {
+			throw new ParseException("Rejected because of Syntax Error(s): " + expression, 0);
+		} else if(this.error != null) {
 			String errorSpot = expression.substring(this.errorOffset, this.errorEnd+1);
-			throw new ParseException(this.error + errorSpot + "; Index in input: " + this.errorEnd + "; ", this.errorEnd);
+			throw new ParseException(this.error + "\"" + errorSpot + "\"; Index in input: " + this.errorOffset + ";", this.errorOffset);
 		} else {
 			return true;
 		}
@@ -70,7 +72,7 @@ public class TypeChecker extends GrammarBaseListener {
 
 	public String getError(String expression) {
 		String errorSpot = expression.substring(this.errorOffset, this.errorEnd+1);
-		return this.error + "\"" + errorSpot + "\"; Index in input: " + this.errorEnd + ";";
+		return this.error + "\"" + errorSpot + "\"; Index in input: " + this.errorOffset + ";";
 	}
 
 	public boolean typeCorrect() {
