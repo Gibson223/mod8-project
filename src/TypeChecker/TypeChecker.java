@@ -235,8 +235,9 @@ public class TypeChecker extends GrammarBaseListener {
 		variableTable.closeScope();
 	}
 
+
 	@Override
-	public void enterSequentialLine(GrammarParser.SequentialLineContext ctx) {
+	public void enterSequential(GrammarParser.SequentialContext ctx) {
 		//if a typeError already occurred, then just return
 		if(error != null) {
 			return;
@@ -244,8 +245,9 @@ public class TypeChecker extends GrammarBaseListener {
 
 		variableTable.openScope();
 	}
+
 	@Override
-	public void exitSequentialLine(GrammarParser.SequentialLineContext ctx) {
+	public void exitSequential(GrammarParser.SequentialContext ctx) {
 		//if a typeError already occurred, then just return
 		if(error != null) {
 			return;
