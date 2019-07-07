@@ -1,5 +1,3 @@
-# MOD8-project
-
 Welcome,
 
 To properly use this new language, open the FINAL_PROJECT.zip in an editor.
@@ -17,7 +15,7 @@ Click apply, OK and close the window.
 Next, make sure the ANTLR plugin is installed and enabled.
 This can be found in Settings -> Plugins, a new window will open.
 If it is not installed yet, click Marketplace in the top part of the window and search for
-"ANTLR v4 grammar plugin", click on it and click install.
+"ANTLR v4 grammar plugin", click on it and click install. 
 Then enable it in the installed tab in the top of the window.
 Click apply, OK and close the window.
 
@@ -27,7 +25,7 @@ Now press Ctrl + Shift + G, a popup on the bottom right should tell you grammar 
 You should now be ready to run programs in this new language!
 
 Open the src/RunLanguage/RunLanguage java class.
-Now put the program you wrote in the PROGRAM_STRING string, at the marked place.
+Now put the program you wrote in the PROGRAM_STRING string, at the marked place. 
 The only thing left to do is to click the triangle to the left of "public class RunLanguage {".
 If your program does not work, the output will give a ParseException with information on where the mistake is.
 Otherwise, the output will give you information on the executed program
