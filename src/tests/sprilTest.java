@@ -3,7 +3,6 @@ package tests;
 import org.junit.Rule;
 import org.junit.Test;
 import codeGeneration.SPRILGenerator;
-import org.junit.rules.ExpectedException;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -14,13 +13,26 @@ import static org.junit.Assert.*;
 
 public class sprilTest {
     // ---------------------------------begin tests for the runtable---------------------------------
-    public String typelessReAssignmentError = "tried to fetch undeclared var (in getHeapLoc)";
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    private String typelessReAssignmentError = "tried to fetch undeclared var (in getHeapLoc)";
     private String addTypeError = "type redeclaration not allowed, already in scope";
 
+
+    private String alreadyLocked = "trying to lock var that is already locked by sequential or main thread...";
+    @Test // trying to lock a variable in global scope leads to an error, because implicitly adds to variable table
+    public void LockTest() {
+        runtimeError("Int x = 10;lock x; lock x;", addError);
+        runtimeError("Int x =10; parallel {sequential {lock x; lock x;}}", alreadyLocked);
+    }
+
+    private String invalidUnlock = "variable not even locked by thread, so cant release it..";
+    @Test
+    public void unlockTest() {
+        runtimeError("Int x;unlock x; lock x;", invalidUnlock);
+    }
+
+//------------------------------------come from symtable------------------------------------
     // source: decline
-    public String addError = "redeclaration not allowed in 1 scope";
+    private String addError = "redeclaration not allowed in 1 scope";
     @Test // in case var already declared and declared again WITH assignment
     public void addError() {
         runtimeError("Int a = 5; Bool a = true;", addError);
@@ -37,19 +49,17 @@ public class sprilTest {
     // source: asgnline
     @Test // in case var not declared yet but trying to assign
     public void asgnError() {
-        runtimeError("a = 5;", typelessReAssignmentError);
+        runtimeError("a = 5;", "no sprockellID for variable name");
     }
 
-    public void runtimeError(String prog, String errormessage) {
+    private void runtimeError(String prog, String errormessage) {
         try {
             SPRILGenerator.convertProgToFile(prog, "");
             fail();
         } catch (RuntimeException e) {
-            assertEquals(e.getMessage(), errormessage);
+            assertEquals(errormessage,e.getMessage());
         }
     }
-    // todo figure out how to work with functions. start new symoltable and restore after functioncall?
-    // like a = new Symboltable(false); a.root = a.currentscope = this.symtable.root;this.symtable = a;
 // ---------------------------------end tests for the symtable---------------------------------
     private static String defaultLoc = "src\\sprockell\\src\\temp.hs";
     public static List<String> runprog(String program) throws IOException, InterruptedException {
@@ -199,24 +209,37 @@ public class sprilTest {
 
     @Test
     public void stupidTest() {
-        assertProg("Int a = 5;parallel {" +
-                "sequential {OutNumber a;}" +
+//        assertProg("Int a = 5;parallel {" +
 //                "sequential {OutNumber a;}" +
-                "sequential {OutNumber a;}"+
-                "}",new ArrayList<>());
+////                "sequential {OutNumber a;}" +
+//                "sequential {OutNumber a;}"+
+//                "} a= 10; OutNumber a;", Arrays.asList(sprolprint(2,5), sprolprint(1,5),sprolprint(0,10)));
+        assertProg("Int a = 5;parallel {" +
+                "sequential {" +
+                "   parallel {" +
+                "       sequential {Nop;}" +
+                "        sequential {Nop;}" +
+                "   }}" +
+                "sequential {Nop;}"+
+                "} a= 10; OutNumber a;", Arrays.asList(sprolprint(4,4), sprolprint(3,3),sprolprint(2,2),sprolprint(0,10)));
     }
 
     @Test
     public void concurrencystuffTest() {
         assertProg("Int a = 5;parallel {" +
                 "sequential {Int a = 10;}" +
-                "sequential {OutNumber a;}" +
-                "sequential {Int a = 30;}"+
+                "sequential {OutNumber a+ 30;}" +
+                "sequential {Int a = 30; OutNumber a;}"+
                 "} OutNumber a;",
                 Arrays.asList(sprolprint(2,5),sprolprint(0,5)));
 //        assertProg("Int a = 1; Int b= 2; parallel {" +
 //                "sequential {OutNumber a; a = 2;}" +
 //                "sequential{OutNumber b;}" +
 //                "} ");
+    }
+
+    @Test
+    public void testingTest() {
+        assertProg("Int x=10; parallel {sequential {OutNumber x;}}",Arrays.asList(sprolprint(1,0)));
     }
 }
