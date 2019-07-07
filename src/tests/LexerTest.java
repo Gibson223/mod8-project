@@ -41,7 +41,7 @@ public class LexerTest {
 
     @Test
     public void returnTest() {
-        String validproglines = "Fun Name Int arg1 Str arg2 Bool arg3 { Int a = 4; Bool c = 'c'; parallel {}";
+        String validproglines = "Fun Name Int arg1 Str arg2 Bool arg3 { Int a = 4; Bool c = true; parallel {sequential {Int a=10;}}";
         correctfun(validproglines +"return x}");
         wrongfun(validproglines +"Return x}");
         wrongfun(validproglines +"return x,y,z;}");
@@ -86,7 +86,7 @@ public class LexerTest {
     @Test
     public void whileTest() {
         correctline("while a[0] < 10 {}");
-        correctline("while true {sequential {parallel {Int a = 5;}}}");
+        correctline("while true {parallel {sequential {Int a = 5;}}}");
         wrongline("while true; {sequential {parallel {Int a = 5;}}}");
         wrongline("while {}");
         correctline("while true {}");
@@ -94,21 +94,24 @@ public class LexerTest {
     @Test //#parallelLine
     public void parallelTest() {
         // empty
-        correctline("parallel {}");
-        // valid nesting parallel
-        correctline("parallel {parallel {}}");
+        wrongline("parallel {}");
+        // invalid nesting parallel
+        wrongline("parallel {sequential { parallel {OutNumber 10;}}}");
+        // valid parallel nesting
+        correctline("parallel {sequential {parallel {sequential {Int a =5;}}}}");
         // parallel with lines
-        correctline("parallel { Int a = 5; Bool s;}");
+        correctline("parallel {sequential { Int a = 5; Bool s;}}");
     }
 
     @Test //#sequentialLine
     public void sequentialTest() {
         // empty
-        correctline("sequential {}");
-        // valid nesting parallel
-        correctline("sequential {sequential {}}");
-        // parallel with lines
-        correctline("sequential { Int a = 5; Bool s;}");
+        correctline("parallel {sequential {Int a;}}");
+        wrongline("sequential {}");
+        // invalid nesting sequential
+        wrongline("sequential {sequential {Bool a = 10;}}");
+        // sequential with lines
+        wrongline("sequential { Int a = 5; Bool s;}");
     }
 
     @Test //#decLine & asgnLine
