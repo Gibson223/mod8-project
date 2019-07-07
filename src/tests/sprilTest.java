@@ -170,11 +170,11 @@ public class sprilTest {
 
     @Test
     public void concurTest() {
-        assertProg("Int a = 5; parallel { sequential {Int a = 10; OutNumber a;}}",
-                Arrays.asList(sprolprint(1, 10)));
         assertProg("Int a = 5; parallel { " +
                         "sequential {OutNumber a;}}",
                 Arrays.asList(sprolprint(1, 5)));
+        assertProg("Int a = 5; parallel { sequential {Int a = 10; OutNumber a;}}",
+                Arrays.asList(sprolprint(1, 10)));
 
 //        assertProg("Int a = 15;parallel { sequential {" +
 //                    "OutNumber a;}}" +
