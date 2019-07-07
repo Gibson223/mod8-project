@@ -19,7 +19,7 @@ regbankSize   =  8   :: Int
 localMemSize  = 32   :: Int
 
 shMemSize     =  8   :: Int
-channelDelay  =  1   :: Int --was 4
+channelDelay  =  4   :: Int --was 4
 
 
 intBool True  = 1                                    -- Bool-to-Int
