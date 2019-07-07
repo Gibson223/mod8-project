@@ -173,73 +173,45 @@ public class sprilTest {
         assertProg("Int a = 5; parallel { sequential {Int a = 10; OutNumber a;}}",
                 Arrays.asList(sprolprint(1, 10)));
         assertProg("Int a = 5; parallel { " +
-                        "sequential {OutNumber a;}}",
-                Arrays.asList(sprolprint(1, 5)));
+                        "sequential {OutNumber a;} " +
+                        "sequential {OutNumber 100;}}",
+                Arrays.asList( sprolprint(2, 100), sprolprint(1, 5)));
 
-//        assertProg("Int a = 15;parallel { sequential {" +
-//                    "OutNumber a;}}" +
-//                "OutNumber a;", Arrays.asList(sprolprint(0, 15)));
+        assertProg("parallel {" +
+                "   sequential {OutNumber 2;} } " +
+                "OutNumber 3;", Arrays.asList(sprolprint(1, 2), sprolprint(0,3)));
+
+        assertProg("Int a = 10; Int b = 11; parallel {" +
+                "sequential {OutNumber a;} sequential {OutNumber b;}}", Arrays.asList(sprolprint(2, 11), sprolprint(1,10)));
     }
-//        assertProg("parallel {" +
-//                "   sequential {OutNumber 2;} } " +
-//                "OutNumber 3;", Arrays.asList());
-
-//        assertProg("Int a = 10; Int b = 11; parallel {" +
-//                "sequential {OutNumber a;} sequential {OutNumber b;}}", Arrays.asList());
-//    }
 
 // ---------------------------concurrency tests--------------------------------------------
     @Test
     public void properJoinTest() { // passed 100 times
-//        assertProg("Int a = 5; parallel { " +
-//                    "sequential {Int a = 10; OutNumber a;}" +
-//                    "} OutNumber a;",
-//                    Arrays.asList(sprolprint(1, 10),sprolprint(0,5)));
+        assertProg("Int a = 5; parallel { " +
+                    "sequential {Int a = 10; OutNumber a;}" +
+                    "} OutNumber a;",
+                    Arrays.asList(sprolprint(1, 10),sprolprint(0,5)));
 
         assertProg("Int a = 5; parallel { " +
-//                        "sequential {Int a = 10; OutNumber a;}" +
-                        "sequential {Int a = 10; OutNumber a;}" +
+                        "sequential {Int a = 30; OutNumber a;}" +
                         "} OutNumber a;",
-                Arrays.asList(sprolprint(1, 10),sprolprint(0,5)
-                        ));
-//        assertProg("Int a = 5; parallel { " +
-//                        "sequential {OutNumber 10;}} OutNumber a;",
-//                Arrays.asList(sprolprint(1, 10)));
-    }
+                Arrays.asList(sprolprint(1, 30),sprolprint(0,5)
 
-    @Test
-    public void stupidTest() {
-//        assertProg("Int a = 5;parallel {" +
-//                "sequential {OutNumber a;}" +
-////                "sequential {OutNumber a;}" +
-//                "sequential {OutNumber a;}"+
-//                "} a= 10; OutNumber a;", Arrays.asList(sprolprint(2,5), sprolprint(1,5),sprolprint(0,10)));
-        assertProg("Int a = 5;parallel {" +
-                "sequential {" +
-                "   parallel {" +
-                "       sequential {Nop;}" +
-                "        sequential {Nop;}" +
-                "   }}" +
-                "sequential {Nop;}"+
-                "} a= 10; OutNumber a;", Arrays.asList(sprolprint(4,4), sprolprint(3,3),sprolprint(2,2),sprolprint(0,10)));
-    }
 
-    @Test
-    public void concurrencystuffTest() {
         assertProg("Int a = 5;parallel {" +
                 "sequential {Int a = 10;}" +
-                "sequential {OutNumber a+ 30;}" +
+                "sequential {OutNumber a;}" +
+                "sequential {OutNumber a+30;}" +
                 "sequential {Int a = 30; OutNumber a;}"+
                 "} OutNumber a;",
-                Arrays.asList(sprolprint(2,5),sprolprint(0,5)));
-//        assertProg("Int a = 1; Int b= 2; parallel {" +
-//                "sequential {OutNumber a; a = 2;}" +
-//                "sequential{OutNumber b;}" +
-//                "} ");
+                Arrays.asList(sprolprint(4,30),sprolprint(3,35),sprolprint(2,5),sprolprint(0,5)));
     }
 
+
+
     @Test
-    public void testingTest() {
-        assertProg("Int x=10; parallel {sequential {OutNumber x;}}",Arrays.asList(sprolprint(1,0)));
+    public void simpleTest() {
+        assertProg("Int x=10; parallel {sequential {OutNumber x;}}",Arrays.asList(sprolprint(0,10)));
     }
 }
