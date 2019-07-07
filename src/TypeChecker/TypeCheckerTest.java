@@ -40,7 +40,7 @@ public class TypeCheckerTest {
 		program("Str s; s = \"str\";", true);
 		program("Arr Int ai; ai = [0];", true);
 
-		program("parallel {Int i = 0; Bool b = true; " +
+		program("Int i = 0; Bool b = true; parallel { " +
 				"sequential {Str a = \"test\"; a = \"notest\"; " +
 				"if b {i = 20;} else {a = \"nope\";}}}", true);
 		program("parallel {Int i = 0; Bool b = true; " +
@@ -77,10 +77,12 @@ public class TypeCheckerTest {
 		line("while [1,2,3] {}", false);
 		line("while true", false);
 
-		line("parallel {}", true);
+		line("parallel {Int i = 0;}", false);
+		line("parallel {}", false);
 		line("parallel", false);
 
-		line("sequential {}", true);
+		line("sequential {Int i = 0;}", false);
+		line("sequential {}", false);
 		line("sequential", false);
 
 		line("Int i = 0;", true);
