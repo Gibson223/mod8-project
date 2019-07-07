@@ -221,8 +221,6 @@ public class TypeChecker extends GrammarBaseListener {
 		if(error != null) {
 			return;
 		}
-
-		variableTable.openScope();
 	}
 	@Override
 	public void exitParallelLine(GrammarParser.ParallelLineContext ctx) {
@@ -232,7 +230,6 @@ public class TypeChecker extends GrammarBaseListener {
 		}
 
 		//nothing to typecheck
-		variableTable.closeScope();
 	}
 
 

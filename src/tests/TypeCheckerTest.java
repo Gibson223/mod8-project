@@ -140,6 +140,7 @@ public class TypeCheckerTest {
 	public void exprTest() {
 		expr("(1*1)", true);
 		expr("(true)", true);
+		expr("(false", false);
 		expr("1*1", true);
 		expr("1*\"hello\"", false);
 		expr("1+1", true);
