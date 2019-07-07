@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RunLanguage {
-    
+
 
 // ==================== ONLY CHANGE THE PROGRAM_STRING BELOW ====================
 
@@ -38,6 +38,9 @@ public class RunLanguage {
             res = runprog(PROGRAM_STRING);
             System.out.println("-------------------");
             System.out.println("res: "+ res);
+            System.out.println("=================================================================");
+            System.out.println("PROGRAM SPROCKELL CODE CAN BE FOUND IN src/sprockell/src/temp.hs");
+            System.out.println("=================================================================");
             System.out.println("-------------------");
         } catch (IOException e) {
             e.printStackTrace();
