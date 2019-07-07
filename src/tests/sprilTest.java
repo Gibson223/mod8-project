@@ -207,7 +207,7 @@ public class sprilTest {
                 Arrays.asList(sprolprint(4,30),sprolprint(3,35),sprolprint(2,5),sprolprint(0,5)));
     }
 
-    @Test // does not terminate, as seen above , however, activating and merging does work with 1 parallel
+    @Test (timeout = 10000) // does not terminate, as seen above , however, activating and merging does work with 1 parallel
     public void failedNestedParallelsTest() {
         assertProg("parallel {sequential {Int a ;}" +
                 "sequential {parallel {sequential {OutNumber 10;} sequential {OutNumber 20;}}}" +
