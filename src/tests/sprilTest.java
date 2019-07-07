@@ -175,9 +175,6 @@ public class sprilTest {
                 Arrays.asList(sprolprint(1, 5)));
         assertProg("Int a = 5; parallel { sequential {Int a = 10; OutNumber a;}}",
                 Arrays.asList(sprolprint(1, 10)));
-//                        "sequential {OutNumber a;} " +
-//                        "sequential {OutNumber 100;}}",
-//                Arrays.asList( sprolprint(2, 100), sprolprint(1, 5)));
 
         assertProg("parallel {" +
                 "   sequential {OutNumber 2;} } " +
