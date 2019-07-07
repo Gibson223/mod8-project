@@ -60,7 +60,7 @@ public class TypeCheckerTest {
 		line("if true {}", true);
 		line("if false {} elif true {}", true);
 		line("if true {} elif true {} elif false {}", true);
-		line("if false {} elif 3 < 5 {} elif 3 > 5 {} else {}", true);
+		line("if 3 == 5 {} elif 3 < 5 {} elif 3 > 5 {} else {}", true);
 		line("if true {} else {}", true);
 		line("if 5 {}", false);
 		line("elif true {}", false);
