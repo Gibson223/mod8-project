@@ -5,7 +5,7 @@ Welcome,
 To properly use this new language, follow the steps below.
 
 Open the "Final Project" folder where this REAMDE is also located, in an editor or IDE.
-This IDE should preferrably IntelliJ Idea to (most easily) follow this guide.
+This IDE should preferably IntelliJ Idea to (most easily) follow this guide.
 
 Next, go to File -> Project Structure.
 A new window will open.
