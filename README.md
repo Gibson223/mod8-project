@@ -2,8 +2,10 @@
 
 Welcome,
 
-To properly use this new language, open the FINAL_PROJECT.zip in an editor.
-That editor is preferably IntelliJ Idea to most easily follow this guide.
+To properly use this new language, follow the steps below.
+
+Open the "Final Project" folder where this REAMDE is also located, in an editor or IDE.
+This IDE should preferrably IntelliJ Idea to (most easily) follow this guide.
 
 Next, go to File -> Project Structure.
 A new window will open.
@@ -22,14 +24,14 @@ Then enable it in the installed tab in the top of the window.
 Click apply, OK and close the window.
 
 Next, open the src/Grammar folder and then single click on Grammar.g4.
-Now press Ctrl + Shift + G, a popup on the bottom right should tell you grammar files were generated.
+Now press Ctrl + Shift + G, a popup on the bottom right should tell you that grammar files were generated.
 
 You should now be ready to run programs in this new language!
 
 Open the src/RunLanguage/RunLanguage java class.
 Now put the program you wrote in the PROGRAM_STRING string, at the marked place.
 The only thing left to do is to click the triangle to the left of "public class RunLanguage {".
-If your program does not work, the output will give a ParseException with information on where the mistake is.
+If your program does not work, the output will give a ParseException with onformation on where the mistake is.
 Otherwise, the output will give you information on the executed program
 and where the generated Hakell/SPROCKELL output is located if you may want to see that.
 
