@@ -196,7 +196,7 @@ public class sprilTest {
         assertProg("Int a = 5; parallel { " +
                         "sequential {Int a = 30; OutNumber a;}" +
                         "} OutNumber a;",
-                Arrays.asList(sprolprint(1, 30),sprolprint(0,5)
+                Arrays.asList(sprolprint(1, 30),sprolprint(0,5)));
 
 
         assertProg("Int a = 5;parallel {" +
@@ -212,6 +212,6 @@ public class sprilTest {
 
     @Test
     public void simpleTest() {
-        assertProg("Int x=10; parallel {sequential {OutNumber x;}}",Arrays.asList(sprolprint(0,10)));
+        assertProg("Int x=10; parallel {sequential {OutNumber x;}}",Arrays.asList(sprolprint(1,10)));
     }
 }
